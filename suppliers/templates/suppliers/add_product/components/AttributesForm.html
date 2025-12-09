@@ -1,0 +1,75 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Attributes Form Component -->
+<div class="form-section">
+    <h2 class="section-title">ویژگی‌های دسته‌بندی</h2>
+    <div class="section-content">
+        <!-- Variant Attributes Notice -->
+        <div id="variantAttributesNotice" style="display: none; margin-bottom: 1rem; padding: 1rem; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px;">
+            <h4 style="color: #856404; margin: 0 0 0.5rem 0;">⚠️ ویژگی‌های متغیر</h4>
+            <p style="color: #856404; margin: 0; font-size: 0.9rem;">
+                برخی از ویژگی‌های این دسته‌بندی برای انواع محصول انتخاب شده‌اند و در این بخش نمایش داده نمی‌شوند.
+                این ویژگی‌ها در بخش "انواع محصول" قابل تنظیم هستند.
+            </p>
+            <div id="hiddenVariantAttributesList" style="margin-top: 0.5rem; font-size: 0.8rem; color: #6c757d;">
+                <!-- Hidden variant attributes will be listed here -->
+            </div>
+        </div>
+        
+        <!-- Display form-level errors -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger" style="margin-bottom: 1rem; padding: 1rem; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px;">
+                <h4 style="color: #721c24; margin: 0 0 0.5rem 0;">❌ خطا در اعتبارسنجی</h4>
+                {% for error in form.non_field_errors %}
+                    <p style="color: #721c24; margin: 0; font-size: 0.9rem;">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <!-- Container for attributes populated by JavaScript (single source of truth) -->
+        <div id="attributes-container" class="attributes-container"></div>
+        
+        <!-- Hidden container for JavaScript-created fields (will be populated but not used for form submission) -->
+        <div id="js-attributes-container" style="display: none;"></div>
+        
+        <script>
+        // Hide variant attribute fields on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Hiding variant attribute fields...');
+            
+            // Get variant attributes from the preserved data
+            const preservedVariantAttributes = {{ preserved_variant_attributes|default:"[]"|safe }};
+            console.log('🔍 Preserved variant attributes:', preservedVariantAttributes);
+            
+            // Hide fields for variant attributes
+            preservedVariantAttributes.forEach(function(attrKey) {
+                const fieldElement = document.querySelector(`[data-attribute-key="${attrKey}"]`);
+                if (fieldElement) {
+                    console.log(`🔍 Hiding variant attribute field: ${attrKey}`);
+                    fieldElement.style.display = 'none';
+                } else {
+                    console.log(`🔍 Variant attribute field not found: ${attrKey}`);
+                }
+            });
+            
+            // Also check if has_variants is enabled and hide common variant attributes
+            const hasVariantsCheckbox = document.getElementById('has_variants');
+            if (hasVariantsCheckbox && hasVariantsCheckbox.checked) {
+                console.log('🔍 Has variants is enabled, checking for common variant attributes...');
+                
+                // Common variant attribute keys
+                const commonVariantKeys = ['brand', 'جنسیت', 'سری', 'نوع حرکت', 'color', 'size', 'رنگ', 'سایز'];
+                
+                commonVariantKeys.forEach(function(attrKey) {
+                    const fieldElement = document.querySelector(`[data-attribute-key="${attrKey}"]`);
+                    if (fieldElement) {
+                        console.log(`🔍 Hiding common variant attribute field: ${attrKey}`);
+                        fieldElement.style.display = 'none';
+                    }
+                });
+            }
+        });
+        </script>
+    </div>
+</div>

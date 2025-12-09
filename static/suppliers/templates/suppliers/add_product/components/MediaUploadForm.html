@@ -1,0 +1,18 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Media Upload Form Component -->
+<div class="image-section">
+    <label>تصاویر محصول</label>
+    <div class="image-upload">
+        <input type="file" id="imageInput" name="images" multiple accept="image/*">
+        <div class="upload-area">
+            <svg class="upload-icon" viewBox="0 0 24 24">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            <p>برای انتخاب تصاویر کلیک کنید</p>
+            <p class="upload-hint">PNG, JPG تا 10 مگابایت</p>
+        </div>
+    </div>
+    <div class="image-preview" id="imagePreviews"></div>
+</div>

@@ -1,0 +1,284 @@
+/* Product Detail Sidebar */
+.product-detail-sidebar {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 375px;
+    height: 100vh;
+    background-color: #fff;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.product-detail-sidebar.active {
+    right: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.close-sidebar {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-sidebar:hover {
+    color: #333;
+}
+
+.sidebar-content {
+    padding: 20px;
+}
+
+.sidebar-loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    color: #666;
+}
+
+.product-info h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 22px;
+    color: #333;
+}
+
+.price {
+    font-size: 18px;
+    font-weight: 600;
+    color: #28a745;
+    margin-bottom: 20px;
+}
+
+/* Image slider */
+.image-slider {
+    position: relative;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.slider-container {
+    display: flex;
+    transition: transform 0.3s ease;
+}
+
+.slide {
+    min-width: 100%;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f8f8;
+}
+
+.slide img {
+    max-width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+}
+
+.no-image {
+    color: #999;
+    font-style: italic;
+    padding: 40px 0;
+    text-align: center;
+    background-color: #f8f8f8;
+    border-radius: 4px;
+}
+
+.slider-nav {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.slider-nav button {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slider-nav button:hover {
+    background-color: rgba(255, 255, 255, 1);
+}
+
+/* Basic info */
+.basic-info, .description, .attributes {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.basic-info p {
+    margin: 8px 0;
+    color: #555;
+}
+
+.description h4, .attributes h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #444;
+}
+
+.description p {
+    margin: 0;
+    color: #555;
+    line-height: 1.5;
+}
+
+.attributes ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.attributes li {
+    margin-bottom: 5px;
+    color: #555;
+}
+
+/* Sidebar actions */
+.sidebar-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.sidebar-actions .button {
+    background-color: #417690;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-actions .button:hover {
+    background-color: #2b5970;
+}
+
+/* Make admin rows clearly clickable */
+#result_list tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+#result_list tbody tr:hover {
+    background-color: rgba(65, 118, 144, 0.1);
+}
+
+/* Style table cells to look clickable */
+#result_list tbody tr td:not(:last-child),
+#result_list tbody tr th {
+    cursor: pointer;
+    position: relative;
+}
+
+/* Add a subtle indicator on hover */
+#result_list tbody tr td:not(:last-child):hover::after,
+#result_list tbody tr th:hover::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(65, 118, 144, 0.05);
+    pointer-events: none;
+}
+
+/* Keep action column with default cursor */
+#result_list tbody tr td:last-child {
+    cursor: default;
+}
+
+/* Helpful hint above the table */
+.clickable-hint {
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+/* Hide "Quick Edit" text on hover, since we're replacing it with clicking on the row */
+.field-_edit {
+    visibility: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-detail-sidebar {
+        width: 100%;
+        right: -100%;
+    }
+}
+
+.tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.tag {
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.tag:hover {
+    background-color: #dee2e6;
+    transform: translateY(-1px);
+} 

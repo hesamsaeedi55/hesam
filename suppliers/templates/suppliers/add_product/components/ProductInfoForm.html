@@ -1,0 +1,48 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Product Information Form Component -->
+<div class="form-section">
+    <h2 class="section-title">اطلاعات پایه</h2>
+    <div class="section-content">
+        <!-- Product Name -->
+        <div class="form-group">
+            <label for="name">نام محصول</label>
+            <input type="text" id="name" name="name" required value="{% if form.name %}{{ form.name.value|default:'' }}{% elif product %}{{ product.name }}{% endif %}">
+        </div>
+
+        <!-- Brand -->
+        <div class="form-group">
+            <label for="brand">برند</label>
+            <input type="text" id="brand" name="brand" value="{% if form.brand %}{{ form.brand.value|default:'' }}{% elif product %}{{ product.brand }}{% endif %}">
+        </div>
+
+        <!-- Brand Image Section -->
+        <div class="form-group">
+            <label for="brand_image">تصویر برند</label>
+            <div class="image-upload">
+                <input type="file" id="brand_image" name="brand_image" accept="image/*">
+                <div class="upload-area">
+                    <svg class="upload-icon" viewBox="0 0 24 24">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    <div>
+                        <p>برای انتخاب تصویر برند کلیک کنید یا فایل را اینجا بکشید</p>
+                        <p class="upload-hint">PNG, JPG تا 10 مگابایت</p>
+                    </div>
+                </div>
+            </div>
+            <div id="brandImagePreview" class="current-image" style="margin-top: 10px;">
+                {% if product and product.brand_image %}
+                <img src="{{ product.brand_image.url }}" alt="Brand Image" style="max-width: 200px;">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+            <label for="description">توضیحات</label>
+            <textarea id="description" name="description" required>{% if form.description %}{{ form.description.value|default:'' }}{% elif product %}{{ product.description }}{% endif %}</textarea>
+        </div>
+    </div>
+</div>

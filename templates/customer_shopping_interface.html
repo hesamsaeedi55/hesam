@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Customer Shopping - Test Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .nav a {
+            padding: 10px 20px;
+            background: #007AFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .nav a:hover {
+            background: #0056CC;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .product-price {
+            color: #007AFF;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .add-to-cart {
+            width: 100%;
+            padding: 10px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .add-to-cart:hover {
+            background: #0056CC;
+        }
+        
+        .add-to-cart:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            transition: right 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .cart-sidebar.open {
+            right: 0;
+        }
+        
+        .cart-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cart-items {
+            padding: 20px;
+        }
+        
+        .cart-item {
+            display: flex;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cart-item-image {
+            width: 60px;
+            height: 60px;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+        
+        .cart-item-info {
+            flex: 1;
+        }
+        
+        .cart-item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .cart-item-price {
+            color: #007AFF;
+            font-weight: 600;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        
+        .remove-item {
+            background: #ff3b30;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .cart-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            position: sticky;
+            bottom: 0;
+            background: white;
+        }
+        
+        .cart-total {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: #34C759;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        .overlay.show {
+            display: block;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #34C759;
+            color: white;
+            border-radius: 8px;
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: transform 0.3s;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: #ff3b30;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #ff3b30;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛍️ Customer Shopping Interface</h1>
+            <p>Test interface for shopping cart functionality</p>
+            
+            <div class="nav">
+                <a href="#" onclick="loadProducts()">Products</a>
+                <a href="#" onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</a>
+                <a href="#" onclick="loadOrders()">Orders</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+            
+            <div id="user-info">
+                <p>Please login to start shopping</p>
+                <button onclick="showLogin()">Login</button>
+            </div>
+        </div>
+        
+        <div id="error-message" class="error" style="display: none;"></div>
+        
+        <div id="products-section">
+            <div class="loading">Loading products...</div>
+        </div>
+        
+        <!-- Debug Section -->
+        <div id="debug-section" style="margin-top: 20px; padding: 20px; background: #f0f0f0; border-radius: 8px;">
+            <h3>🔧 Debug Information</h3>
+            <div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin-bottom: 15px;">
+                <strong>⚠️ Important:</strong> Make sure you're accessing the correct URL:<br>
+                <strong>✅ Correct:</strong> <code>http://127.0.0.1:8000/accounts/shopping/</code><br>
+                <strong>❌ Wrong:</strong> <code>http://127.0.0.1:8000/accounts/</code> (this redirects to login)
+            </div>
+            <div id="debug-info">
+                <p><strong>Auth Token:</strong> <span id="debug-token">Not loaded</span></p>
+                <p><strong>Current User:</strong> <span id="debug-user">Not loaded</span></p>
+                <p><strong>Cart Status:</strong> <span id="debug-cart">Not loaded</span></p>
+                <p><strong>Products Count:</strong> <span id="debug-products">Not loaded</span></p>
+            </div>
+            <button onclick="testAddToCart()" style="margin-top: 10px; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px;">
+                🧪 Test Add to Cart (Product ID: 363)
+            </button>
+            <div style="margin-top: 15px; font-size: 12px; color: #666;">
+                <strong>Console Logs:</strong> Open browser Developer Tools (F12) → Console tab to see detailed logs
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cart Sidebar -->
+    <div class="overlay" id="cart-overlay" onclick="toggleCart()"></div>
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h3>Shopping Cart</h3>
+            <button onclick="toggleCart()" style="background: none; border: none; font-size: 20px; cursor: pointer;">×</button>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <div class="loading">Loading cart...</div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                Total: <span id="cart-total">0 تومان</span>
+            </div>
+            <button class="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+    
+    <!-- Login Modal -->
+    <div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 8px; width: 400px;">
+            <h3>Login</h3>
+            <form id="login-form">
+                <div style="margin-bottom: 15px;">
+                    <label>Email:</label>
+                    <input type="email" id="login-email" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Password:</label>
+                    <input type="password" id="login-password" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="flex: 1; padding: 10px; background: #007AFF; color: white; border: none; border-radius: 4px; cursor: pointer;">Login</button>
+                    <button type="button" onclick="hideLogin()" style="flex: 1; padding: 10px; background: #ccc; color: white; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        // Using Django session authentication - no JWT token needed
+        let currentUser = {
+            id: '{{ user.id }}',
+            email: '{{ user.email }}',
+            first_name: '{{ user.first_name }}',
+            username: '{{ user.username }}'
+        };
+        let cart = null;
+        let isAuthenticated = true; // User is authenticated via Django session
+        
+        // API Base URL
+        const API_BASE = '/shop/api/customer';
+        
+        // CSRF Token handling
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        function getCSRFToken() {
+            // Try to get CSRF token from cookie first
+            let csrfToken = getCookie('csrftoken');
+            
+            // If not found in cookie, try meta tag
+            if (!csrfToken) {
+                const metaTag = document.querySelector('meta[name="csrf-token"]');
+                if (metaTag) {
+                    csrfToken = metaTag.getAttribute('content');
+                }
+            }
+            
+            return csrfToken;
+        }
+        
+        // Enhanced fetch function with CSRF token
+        async function apiRequest(url, options = {}) {
+            const csrfToken = getCSRFToken();
+            console.log('🔐 CSRF Token:', csrfToken ? 'Found' : 'Not found');
+            
+            const defaultOptions = {
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(csrfToken && { 'X-CSRFToken': csrfToken }),
+                    ...options.headers
+                }
+            };
+            
+            return fetch(url, { ...defaultOptions, ...options });
+        }
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Shopping interface initialized');
+            console.log('🔑 Using session authentication');
+            
+            // Update debug info
+            updateDebugInfo();
+            
+            // Add global click handler for debugging
+            document.addEventListener('click', function(event) {
+                if (event.target.textContent.includes('Add to Cart') || event.target.classList.contains('add-to-cart') || event.target.classList.contains('btn-primary')) {
+                    console.log('🖱️ Add to Cart button clicked!', {
+                        element: event.target,
+                        classes: event.target.className,
+                        text: event.target.textContent,
+                        onclick: event.target.onclick
+                    });
+                }
+            });
+            
+            // User is already authenticated via Django session
+            console.log('✅ User authenticated via Django session:', currentUser.email);
+            updateUserInfo();
+                loadProducts();
+                loadCart();
+        });
+        
+        // Authentication functions
+        async function login(email, password) {
+            console.log('🔐 Attempting login for:', email);
+            try {
+                const response = await fetch('/accounts/token/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                console.log('📡 Login response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Login successful, received tokens');
+                    authToken = data.access;
+                    localStorage.setItem('auth_token', authToken);
+                    
+                    // Get user info
+                    console.log('👤 Fetching user info...');
+                    const userResponse = await fetch('/accounts/user/', {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    if (userResponse.ok) {
+                        currentUser = await userResponse.json();
+                        console.log('✅ User info loaded:', currentUser);
+                    updateUserInfo();
+                    hideLogin();
+                    loadProducts();
+                    loadCart();
+                    showNotification('Login successful!', 'success');
+                    } else {
+                        console.error('❌ Failed to load user info:', userResponse.status);
+                        showNotification('Login successful but failed to load user info', 'error');
+                    }
+                } else {
+                    const error = await response.json();
+                    console.error('❌ Login failed:', error);
+                    showNotification(error.detail || error.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Login network error:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+        
+        function logout() {
+            authToken = null;
+            currentUser = null;
+            cart = null;
+            localStorage.removeItem('auth_token');
+            updateUserInfo();
+            showLogin();
+        }
+        
+        async function loadUserInfo() {
+            console.log('👤 Loading user info...');
+            
+            try {
+                const response = await apiRequest('/accounts/user/');
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    console.log('✅ User info loaded:', userData);
+                    currentUser = userData;
+                    updateUserInfo();
+                } else {
+                    console.error('❌ Failed to load user info:', response.status);
+                }
+            } catch (error) {
+                console.error('❌ Error loading user info:', error);
+            }
+        }
+        
+        function updateUserInfo() {
+            const userInfo = document.getElementById('user-info');
+            if (currentUser) {
+                userInfo.innerHTML = `
+                    <p>Welcome, ${currentUser.first_name || currentUser.username}!</p>
+                    <p>Email: ${currentUser.email}</p>
+                `;
+                // Update debug info
+                document.getElementById('debug-user').textContent = currentUser.email;
+            } else {
+                userInfo.innerHTML = `
+                    <p>Please login to start shopping</p>
+                    <button onclick="showLogin()">Login</button>
+                `;
+                document.getElementById('debug-user').textContent = 'Not logged in';
+            }
+        }
+        
+        // Debug functions
+        function updateDebugInfo() {
+            document.getElementById('debug-token').textContent = 'Django Session Auth';
+            document.getElementById('debug-user').textContent = currentUser ? currentUser.email : 'Not logged in';
+            document.getElementById('debug-cart').textContent = cart ? `${cart.total_items || 0} items` : 'Not loaded';
+        }
+        
+        function testAddToCart() {
+            console.log('🧪 Testing add to cart with product ID 363');
+            addToCart(363, null, 1);
+        }
+        
+        // Product functions
+        async function loadProducts() {
+            console.log('📦 Loading products...');
+            const productsSection = document.getElementById('products-section');
+            productsSection.innerHTML = '<div class="loading">Loading products...</div>';
+            
+            try {
+                console.log('🌐 Fetching products from:', `${API_BASE}/products/`);
+                const response = await apiRequest(`${API_BASE}/products/`);
+                
+                console.log('📡 Products response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Products loaded:', data.results ? data.results.length : data.length, 'products');
+                    displayProducts(data.results || data);
+                } else {
+                    console.error('❌ Failed to load products:', response.status);
+                    showError('Failed to load products');
+                }
+            } catch (error) {
+                console.error('❌ Products network error:', error);
+                showError('Network error loading products');
+            }
+        }
+        
+        function displayProducts(products) {
+            console.log('🎨 Displaying products:', products.length);
+            const productsSection = document.getElementById('products-section');
+            
+            if (products.length === 0) {
+                productsSection.innerHTML = '<div class="loading">No products available</div>';
+                return;
+            }
+            
+            const productsHTML = `
+                <h2>Products</h2>
+                <div class="products-grid">
+                    ${products.map(product => `
+                        <div class="product-card">
+                            <div class="product-image">
+                                ${product.images && product.images.length > 0 ? 
+                                    `<img src="${product.images[0].image}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">` :
+                                    'No Image'
+                                }
+                            </div>
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-price">${product.price_toman} تومان</div>
+                            <button class="add-to-cart" onclick="addToCart(${product.id})">
+                                Add to Cart
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            productsSection.innerHTML = productsHTML;
+            console.log('✅ Products displayed, buttons should be clickable');
+            
+            // Update debug info
+            document.getElementById('debug-products').textContent = products.length;
+            updateDebugInfo();
+        }
+        
+        // Cart functions
+        async function loadCart() {
+            try {
+                console.log('🛒 Loading cart...');
+                const response = await apiRequest(`${API_BASE}/cart/`);
+                console.log('🛒 Cart API response status:', response.status);
+                
+                if (response.ok) {
+                    cart = await response.json();
+                    console.log('✅ Cart loaded:', cart);
+                    console.log('✅ Cart items count:', cart.items ? cart.items.length : 'undefined');
+                    updateCartDisplay();
+                    updateDebugInfo();
+                } else {
+                    console.error('❌ Failed to load cart:', response.status);
+                    const errorText = await response.text();
+                    console.error('❌ Cart API error:', errorText);
+                }
+            } catch (error) {
+                console.error('❌ Failed to load cart:', error);
+            }
+        }
+        
+        async function addToCart(productId, variantId = null, quantity = 1) {
+            console.log('🛒 addToCart function called with:', { productId, variantId, quantity });
+            
+            try {
+                console.log('🛒 Adding to cart:', { productId, variantId, quantity });
+                const response = await apiRequest(`${API_BASE}/cart/`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        product_id: productId,
+                        variant_id: variantId,
+                        quantity: quantity
+                    })
+                });
+                
+                console.log('Cart response status:', response.status);
+                
+                if (response.ok) {
+                    const responseData = await response.json();
+                    console.log('Add to cart response:', responseData);
+                    
+                    // The API returns {message: "...", cart: {...}}
+                    // We need to use the cart data from the response
+                    if (responseData.cart) {
+                        cart = responseData.cart;
+                    } else {
+                        cart = responseData;
+                    }
+                    
+                    console.log('Cart updated:', cart);
+                    updateCartDisplay();
+                    showNotification('Added to cart!', 'success');
+                    updateDebugInfo();
+                } else {
+                    const error = await response.json();
+                    console.error('Cart error:', error);
+                    showNotification(error.error || error.detail || 'Failed to add to cart', 'error');
+                }
+            } catch (error) {
+                console.error('Cart network error:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+        
+        async function updateCartItem(itemId, quantity) {
+            console.log('🛒 Updating cart item:', { itemId, quantity });
+            
+            try {
+                const response = await apiRequest(`${API_BASE}/cart/`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        item_id: itemId,
+                        quantity: quantity
+                    })
+                });
+                
+                if (response.ok) {
+                    // After updating, reload the cart to get the latest data
+                    await loadCart();
+                    showNotification('Cart updated', 'success');
+                } else {
+                    showNotification('Failed to update cart', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error updating cart:', error);
+                showNotification('Error updating cart', 'error');
+            }
+        }
+        
+        async function removeFromCart(itemId) {
+            console.log('🛒 Removing cart item:', itemId);
+            
+            try {
+                const response = await apiRequest(`${API_BASE}/cart/`, {
+                    method: 'DELETE',
+                    body: JSON.stringify({
+                        item_id: itemId
+                    })
+                });
+                
+                if (response.ok) {
+                    // After removing, reload the cart to get the latest data
+                    await loadCart();
+                    showNotification('Item removed from cart', 'success');
+                } else {
+                    showNotification('Failed to remove item', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error removing cart item:', error);
+                showNotification('Error removing item', 'error');
+            }
+        }
+        
+        function updateCartDisplay() {
+            console.log('🛒 updateCartDisplay called with cart:', cart);
+            
+            if (!cart) {
+                console.log('❌ No cart data available');
+                return;
+            }
+            
+            // Update cart count
+            const cartCountElement = document.getElementById('cart-count');
+            if (cartCountElement) {
+                cartCountElement.textContent = cart.total_items || 0;
+                console.log('✅ Updated cart count to:', cart.total_items || 0);
+            } else {
+                console.log('❌ Cart count element not found');
+            }
+            
+            // Update cart items
+            const cartItems = document.getElementById('cart-items');
+            console.log('🛒 Cart items element:', cartItems);
+            console.log('🛒 Cart items array:', cart.items);
+            console.log('🛒 Cart items length:', cart.items ? cart.items.length : 'undefined');
+            
+            if (cartItems) {
+                if (cart.items && cart.items.length > 0) {
+                    console.log('✅ Rendering cart items...');
+                    cartItems.innerHTML = cart.items.map(item => `
+                    <div class="cart-item">
+                        <div class="cart-item-image">
+                            ${item.product.images && item.product.images.length > 0 ? 
+                                `<img src="${item.product.images[0].image}" alt="${item.product.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">` :
+                                'No Image'
+                            }
+                        </div>
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.product.name}</div>
+                            ${item.variant ? `<div style="font-size: 12px; color: #666;">${item.variant.variant_name}</div>` : ''}
+                            <div class="cart-item-price">${item.total_price_toman} تومان</div>
+                            <div class="quantity-controls">
+                                <button class="quantity-btn" onclick="updateCartItem('${item.id}', ${item.quantity - 1})">-</button>
+                                <input type="number" class="quantity-input" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}', parseInt(this.value))">
+                                <button class="quantity-btn" onclick="updateCartItem('${item.id}', ${item.quantity + 1})">+</button>
+                                <button class="remove-item" onclick="removeFromCart('${item.id}')">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                } else {
+                    console.log('❌ Cart is empty or no items');
+                    cartItems.innerHTML = '<div class="loading">Cart is empty</div>';
+                }
+            } else {
+                console.log('❌ Cart items element not found');
+            }
+            
+            // Update cart total
+            const cartTotalElement = document.getElementById('cart-total');
+            if (cartTotalElement) {
+                cartTotalElement.textContent = `${cart.total_price_toman || 0} تومان`;
+                console.log('✅ Updated cart total to:', cart.total_price_toman || 0);
+            } else {
+                console.log('❌ Cart total element not found');
+            }
+        }
+        
+        function toggleCart() {
+            const sidebar = document.getElementById('cart-sidebar');
+            const overlay = document.getElementById('cart-overlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+        
+        async function proceedToCheckout() {
+            console.log('💳 Proceeding to checkout...');
+            console.log('🛒 Current cart state:', cart);
+            
+            if (!cart) {
+                showNotification('Cart not loaded. Please refresh and try again.', 'error');
+                return;
+            }
+            
+            if (!cart.items || cart.items.length === 0) {
+                showNotification('Cart is empty', 'error');
+                return;
+            }
+            
+            // Show checkout modal
+            showCheckoutModal();
+        }
+        
+        function showCheckoutModal() {
+            console.log('💳 Opening checkout modal...');
+            console.log('🛒 Cart data:', cart);
+            
+            if (!cart || !cart.items || cart.items.length === 0) {
+                showNotification('Cart is empty', 'error');
+                return;
+            }
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Checkout</h3>
+                        <button onclick="closeCheckoutModal()" class="close-btn">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="checkout-form">
+                            <!-- Contact Information -->
+                            <div class="form-section">
+                                <h4>Contact Information</h4>
+                                <div class="form-group">
+                                    <label>Phone Number: <span style="color: red;">*</span></label>
+                                    <input type="tel" id="phone-number" required placeholder="Enter your phone number">
+                                </div>
+                                <div class="form-group">
+                                    <label>Alternative Phone Number:</label>
+                                    <input type="tel" id="alt-phone" placeholder="Enter alternative phone (optional)">
+                                </div>
+                            </div>
+
+                            <!-- Delivery Information -->
+                            <div class="form-section">
+                                <h4>Delivery Information</h4>
+                                <div class="form-group">
+                                    <label>Full Address: <span style="color: red;">*</span></label>
+                                    <textarea id="delivery-address" required placeholder="Enter your complete delivery address" rows="3"></textarea>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>City: <span style="color: red;">*</span></label>
+                                        <input type="text" id="city" required placeholder="Enter city">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Postal Code: <span style="color: red;">*</span></label>
+                                        <input type="text" id="postal-code" required placeholder="Enter postal code">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Delivery Instructions:</label>
+                                    <textarea id="delivery-instructions" placeholder="Special delivery instructions (optional)" rows="2"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Payment & Delivery Options -->
+                            <div class="form-section">
+                                <h4>Payment & Delivery</h4>
+                                <div class="form-group">
+                                    <label>Payment Method: <span style="color: red;">*</span></label>
+                                    <select id="payment-method" required>
+                                        <option value="cod">Cash on Delivery (COD)</option>
+                                        <option value="card">Credit Card</option>
+                                        <option value="bank">Bank Transfer</option>
+                                        <option value="wallet">Digital Wallet</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Delivery Option: <span style="color: red;">*</span></label>
+                                    <select id="delivery-option" required>
+                                        <option value="standard">Standard Delivery (3-5 days)</option>
+                                        <option value="express">Express Delivery (1-2 days)</option>
+                                        <option value="same-day">Same Day Delivery (if available)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Optional Preferences -->
+                            <div class="form-section">
+                                <h4>Order Preferences (Optional)</h4>
+                                <div class="form-group">
+                                    <label>Special Instructions:</label>
+                                    <textarea id="special-instructions" placeholder="Any special instructions for your order (optional)" rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Gift Message:</label>
+                                    <textarea id="gift-message" placeholder="Gift message (if this is a gift)" rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="gift-wrapping"> Gift Wrapping (+5 تومان)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="order-summary">
+                                <h4>Order Summary</h4>
+                                <div id="checkout-items">Loading items...</div>
+                                <div class="total">
+                                    <strong>Total: ${cart.total_price_toman ? cart.total_price_toman.toLocaleString() : '0'} تومان</strong>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button onclick="closeCheckoutModal()" class="btn btn-secondary">Cancel</button>
+                        <button onclick="processCheckout()" class="btn btn-primary">Place Order</button>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal styles
+            const style = document.createElement('style');
+            style.textContent = `
+                .modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 1000;
+                }
+                .modal-content {
+                    background: white;
+                    border-radius: 8px;
+                    width: 90%;
+                    max-width: 500px;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                }
+                .modal-header {
+                    padding: 20px;
+                    border-bottom: 1px solid #eee;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .modal-body {
+                    padding: 20px;
+                }
+                .modal-footer {
+                    padding: 20px;
+                    border-top: 1px solid #eee;
+                    display: flex;
+                    gap: 10px;
+                    justify-content: flex-end;
+                }
+                .form-group {
+                    margin-bottom: 15px;
+                }
+                .form-group label {
+                    display: block;
+                    margin-bottom: 5px;
+                    font-weight: bold;
+                }
+                .form-group input,
+                .form-group textarea,
+                .form-group select {
+                    width: 100%;
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    box-sizing: border-box;
+                }
+                .form-section {
+                    margin-bottom: 25px;
+                    padding: 15px;
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    border-left: 4px solid #007AFF;
+                }
+                .form-section h4 {
+                    margin: 0 0 15px 0;
+                    color: #007AFF;
+                    font-size: 16px;
+                }
+                .form-row {
+                    display: flex;
+                    gap: 15px;
+                }
+                .form-row .form-group {
+                    flex: 1;
+                }
+                .form-group input[type="checkbox"] {
+                    width: auto;
+                    margin-right: 8px;
+                }
+                .order-summary {
+                    background: #f9f9f9;
+                    padding: 15px;
+                    border-radius: 4px;
+                    margin-top: 20px;
+                }
+                .close-btn {
+                    background: none;
+                    border: none;
+                    font-size: 24px;
+                    cursor: pointer;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Add modal to DOM first
+            document.body.appendChild(modal);
+            
+            // Then populate checkout items after modal is in DOM
+            const checkoutItems = document.getElementById('checkout-items');
+            console.log('🔍 Looking for checkout-items element:', checkoutItems);
+            
+            if (checkoutItems && cart.items && Array.isArray(cart.items)) {
+                console.log('✅ Found checkout-items element, populating with', cart.items.length, 'items');
+                checkoutItems.innerHTML = cart.items.map(item => {
+                    const productName = item.product ? item.product.name : 'Unknown Product';
+                    const quantity = item.quantity || 1;
+                    const price = item.total_price_toman || 0;
+                    return `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>${productName} x${quantity}</span>
+                            <span>${price.toLocaleString()} تومان</span>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                console.error('❌ Error populating checkout items:', {
+                    checkoutItems: checkoutItems,
+                    cartItems: cart.items,
+                    isArray: Array.isArray(cart.items)
+                });
+                if (checkoutItems) {
+                    checkoutItems.innerHTML = '<div style="color: red;">Error loading cart items</div>';
+                }
+            }
+        }
+        
+        function closeCheckoutModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        async function processCheckout() {
+            console.log('💳 Processing checkout...');
+            
+            const address = document.getElementById('delivery-address').value;
+            const phone = document.getElementById('phone-number').value;
+            const altPhone = document.getElementById('alt-phone').value;
+            const postalCode = document.getElementById('postal-code').value;
+            const city = document.getElementById('city').value;
+            const deliveryInstructions = document.getElementById('delivery-instructions').value;
+            const paymentMethod = document.getElementById('payment-method').value;
+            const deliveryOption = document.getElementById('delivery-option').value;
+            const specialInstructions = document.getElementById('special-instructions').value;
+            const giftMessage = document.getElementById('gift-message').value;
+            const giftWrapping = document.getElementById('gift-wrapping').checked;
+            
+            if (!address || !phone || !postalCode || !city) {
+                showNotification('Please fill in all required fields (marked with *)', 'error');
+                return;
+            }
+            
+            try {
+                const response = await apiRequest(`${API_BASE}/checkout/`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                        delivery_address: address,
+                        phone_number: phone,
+                        alt_phone_number: altPhone,
+                        postal_code: postalCode,
+                        city: city,
+                        delivery_instructions: deliveryInstructions,
+                        payment_method: paymentMethod,
+                        delivery_option: deliveryOption,
+                        special_instructions: specialInstructions,
+                        gift_message: giftMessage,
+                        gift_wrapping: giftWrapping
+                        })
+                    });
+                
+                console.log('Checkout response status:', response.status);
+                    
+                    if (response.ok) {
+                        const order = await response.json();
+                    console.log('✅ Order placed successfully:', order);
+                    showNotification(`Order placed successfully! Order #${order.order_number || order.id}`, 'success');
+                    closeCheckoutModal();
+                        toggleCart();
+                        loadCart(); // Refresh cart
+                    } else {
+                        const error = await response.json();
+                    console.error('❌ Checkout failed:', error);
+                    showNotification(error.error || error.detail || 'Checkout failed', 'error');
+                    }
+                } catch (error) {
+                console.error('❌ Checkout network error:', error);
+                    showNotification('Network error during checkout', 'error');
+            }
+        }
+        
+        // Order functions
+        async function loadOrders() {
+            console.log('📋 Loading orders...');
+            
+            try {
+                const response = await apiRequest(`${API_BASE}/orders/`);
+                
+                console.log('📡 Orders response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Orders loaded:', data);
+                    displayOrders(data.results || data);
+                } else {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    console.error('❌ Failed to load orders:', response.status, errorData);
+                    showNotification(`Failed to load orders: ${errorData.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error loading orders:', error);
+                showNotification(`Error loading orders: ${error.message}`, 'error');
+            }
+        }
+        
+        function displayOrders(orders) {
+            console.log('📋 Displaying orders:', orders);
+            const productsSection = document.getElementById('products-section');
+            
+            // Handle case where orders is not an array
+            if (!Array.isArray(orders)) {
+                console.error('❌ Orders is not an array:', orders);
+                productsSection.innerHTML = '<div class="loading">Error: Invalid orders data format</div>';
+                return;
+            }
+            
+            if (orders.length === 0) {
+                productsSection.innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <h2>No Orders Yet</h2>
+                        <p style="color: #666; margin: 20px 0;">You haven't placed any orders yet.</p>
+                        <p style="color: #666; margin-bottom: 30px;">Add some items to your cart and place your first order!</p>
+                        <button onclick="loadProducts()" style="background: #007AFF; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer;">
+                            Start Shopping
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const ordersHTML = `
+                <h2>Order History</h2>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    ${orders.map(order => `
+                        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h3>Order #${order.order_number}</h3>
+                                <span style="padding: 5px 10px; background: ${order.status === 'paid' ? '#28a745' : '#ffc107'}; color: white; border-radius: 4px; font-size: 12px;">
+                                    ${order.status.toUpperCase()}
+                                </span>
+                            </div>
+                            <p><strong>Total:</strong> ${order.total_amount.toLocaleString()} تومان</p>
+                            <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleDateString()}</p>
+                            <p><strong>Address:</strong> ${order.address}</p>
+                            <p><strong>Payment:</strong> ${order.payment_method ? order.payment_method.toUpperCase() : 'Unknown'}</p>
+                            <div style="margin-top: 10px;">
+                                <strong>Items:</strong>
+                                ${order.items && order.items.length > 0 ? order.items.map(item => `
+                                    <div style="margin-left: 20px; font-size: 14px;">
+                                        ${item.product_name} x${item.quantity} - ${item.total.toLocaleString()} تومان
+                                    </div>
+                                `).join('') : '<div style="margin-left: 20px; font-size: 14px; color: #666;">No items found</div>'}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            productsSection.innerHTML = ordersHTML;
+        }
+        
+        // UI Helper functions
+        function showLogin() {
+            document.getElementById('login-modal').style.display = 'block';
+        }
+        
+        function hideLogin() {
+            document.getElementById('login-modal').style.display = 'none';
+        }
+        
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Login form handler
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            login(email, password);
+        });
+    </script>
+</body>
+</html>

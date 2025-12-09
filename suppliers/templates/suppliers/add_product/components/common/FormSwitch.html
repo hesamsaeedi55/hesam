@@ -1,0 +1,17 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Reusable Switch/Toggle Component -->
+<div class="form-group">
+    <label for="{{ field_id }}">{{ label }}</label>
+    <div class="switch">
+        <input type="checkbox" 
+               id="{{ field_id }}" 
+               name="{{ field_name }}" 
+               {% if checked %}checked{% endif %}
+               {% if onchange %}onchange="{{ onchange }}"{% endif %}>
+        <span class="slider round"></span>
+    </div>
+    <span class="status-text" id="{{ status_text_id|default:field_id }}Text">{{ status_text|default:'فعال' }}</span>
+    {% if help_text %}<small class="form-text text-muted">{{ help_text }}</small>{% endif %}
+</div>

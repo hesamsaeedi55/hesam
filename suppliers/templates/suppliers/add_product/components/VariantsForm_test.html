@@ -1,0 +1,332 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Product Variants Form Component - TEST VERSION -->
+<div class="form-section" id="variants-section">
+    <label class="toggle-label" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+        <input type="checkbox" id="has_variants" name="has_variants"
+               onchange="toggleVariantsSection(this)"
+               style="display: none;"
+               {% if existing_variants or preserved_variant_attributes %}checked{% endif %}>
+      
+        <span class="toggle-switch" style="width: 50px; height: 25px; background: {% if existing_variants or preserved_variant_attributes %}#4CAF50{% else %}#ccc{% endif %}; border-radius: 25px; position: relative; transition: background 0.3s;">
+          <span style="position: absolute; top: 2px; left: 2px; width: 21px; height: 21px; background: white; border-radius: 50%; transition: transform 0.3s; {% if existing_variants or preserved_variant_attributes %}transform: translateX(25px);{% endif %}"></span>
+        </span>
+        این محصول انواع مختلف دارد
+      </label>
+      
+
+    
+    <div class="section-content" id="variants-content" style="{% if existing_variants or preserved_variant_attributes %}display: block;{% else %}display: none;{% endif %}">
+        <p>Variants content loaded</p>
+        
+        <!-- Variant Attributes Selection -->
+        <div class="variant-attributes-selection">
+            <h3>انتخاب ویژگی‌های متغیر</h3>
+            <p class="description">ویژگی‌هایی که برای این محصول قابل تغییر هستند را انتخاب کنید:</p>
+            <div class="variant-attributes-grid" id="variantAttributesGrid">
+                <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">
+                    ابتدا دسته‌بندی محصول را انتخاب کنید تا ویژگی‌های مربوطه نمایش داده شود
+                </p>
+            </div>
+        </div>
+        
+        <!-- Script to restore preserved variant attributes -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Restore preserved variant attributes if they exist
+            const preservedVariantAttributes = {{ preserved_variant_attributes|safe }};
+            if (preservedVariantAttributes && preservedVariantAttributes.length > 0) {
+                console.log('🔄 Restoring preserved variant attributes:', preservedVariantAttributes);
+                
+                // Wait for category attributes to load, then restore selection
+                setTimeout(function() {
+                    preservedVariantAttributes.forEach(function(attrKey) {
+                        const attributeItem = document.querySelector(`[data-attribute="${attrKey}"]`);
+                        if (attributeItem) {
+                            const checkbox = attributeItem.querySelector('input[type="checkbox"]');
+                            if (checkbox) {
+                                checkbox.checked = true;
+                                attributeItem.classList.add('selected');
+                                console.log('✅ Restored variant attribute:', attrKey);
+                            }
+                        }
+                    });
+                }, 1000);
+            }
+
+            // Normalize variants toggle: if no preserved attrs and no existing variants, force OFF
+            try {
+                const hasVariants = document.getElementById('has_variants');
+                const existingVariantsScript = document.getElementById('existing-variants-data');
+                let existingVariants = [];
+                if (existingVariantsScript && existingVariantsScript.textContent) {
+                    try { existingVariants = JSON.parse(existingVariantsScript.textContent) || []; } catch (e) { existingVariants = []; }
+                }
+                const shouldForceOff = (!preservedVariantAttributes || preservedVariantAttributes.length === 0) && (!existingVariants || existingVariants.length === 0);
+                if (hasVariants && shouldForceOff) {
+                    hasVariants.checked = false;
+                    // Also ensure any stale hidden variant_attributes input is removed
+                    const formEl = document.getElementById('product_form');
+                    const stale = formEl ? formEl.querySelector('input[name="variant_attributes"]') : null;
+                    if (stale) stale.parentNode.removeChild(stale);
+                    // Hide variants content
+                    const content = document.getElementById('variants-content');
+                    if (content) content.style.display = 'none';
+                    console.log('🔧 Normalized: forced variants OFF (no preserved attributes, no existing variants)');
+                }
+            } catch (e) {
+                console.warn('⚠️ Could not normalize variants toggle:', e);
+            }
+        });
+        </script>
+
+        <!-- Variant Modal moved to main document for full screen access -->
+        
+        <!-- Variants Management Table -->
+        <div class="variants-management" id="variantsManagement" style="margin-top: 20px;">
+            <div class="management-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;">مدیریت انواع محصول</h3>
+                <div class="management-actions" style="display: flex; gap: 10px;">
+                    <button type="button" onclick="openVariantModalForAdd();" style="background: blue; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">+ افزودن دستی</button>
+                    <button type="button" onclick="testLoadCategoryAttributes();" style="background: green; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">تست بارگذاری ویژگی‌ها</button>
+                    <button type="button" onclick="window.testVariantUI();" style="background: orange; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">تست UI مستقیم</button>
+                    <button type="button" onclick="window.debugSelection();" style="background: red; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">دیباگ انتخاب</button>
+                    <button type="button" onclick="window.testMultiSelection();" style="background: purple; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">تست انتخاب چندگانه</button>
+                    <button type="button" onclick="window.testVariantModalForm();" style="background: teal; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">تست فرم مودال</button>
+                </div>
+            </div>
+            <div class="variants-table-container" style="overflow-x: auto;">
+                <table class="variants-table" id="variantsTable" style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                    <thead>
+                        <tr style="background: #f5f5f5;">
+                            <th style="padding: 12px; border: 1px solid #ddd; text-align: right;">کد محصول (SKU)</th>
+                            <th style="padding: 12px; border: 1px solid #ddd; text-align: right;">ویژگی‌ها</th>
+                            <th style="padding: 12px; border: 1px solid #ddd; text-align: right;">قیمت (تومان)</th>
+                            <th style="padding: 12px; border: 1px solid #ddd; text-align: right;">موجودی</th>
+                            <th style="padding: 12px; border: 1px solid #ddd; text-align: right;">وضعیت</th>
+                            <th style="padding: 12px; border: 1px solid #ddd; text-align: right;">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="variantsTableBody">
+                        <!-- Variant rows will be added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle functionality for test version
+function toggleVariantsSection(checkbox) {
+    console.log('🔄 Toggling variants section:', checkbox.checked);
+    const content = document.getElementById('variants-content');
+    const toggleSwitch = checkbox.nextElementSibling;
+    const toggleKnob = toggleSwitch.querySelector('span');
+    
+    if (content) {
+        content.style.display = checkbox.checked ? 'block' : 'none';
+    }
+    
+    // Update toggle visual state
+    if (checkbox.checked) {
+        toggleSwitch.style.background = '#4CAF50';
+        toggleKnob.style.transform = 'translateX(25px)';
+
+        
+        // ✨ CRITICAL: Disable main image upload when variants are enabled
+        console.log('🔄 Variants enabled - disabling main image upload...');
+        const mainImageInput = document.getElementById('imageInput');
+        const mainImageSection = document.querySelector('.image-section');
+        console.log('🔍 Main image input found:', !!mainImageInput);
+        console.log('🔍 Main image section found:', !!mainImageSection);
+        
+        if (mainImageInput) {
+            mainImageInput.disabled = true;
+            console.log('✅ Main image input disabled');
+        } else {
+            console.error('❌ Main image input not found!');
+        }
+        
+        if (mainImageSection) {
+            const uploadArea = mainImageSection.querySelector('.upload-area');
+            console.log('🔍 Upload area found:', !!uploadArea);
+            if (uploadArea) {
+                uploadArea.style.opacity = '0.5';
+                uploadArea.style.cursor = 'not-allowed';
+                uploadArea.style.pointerEvents = 'none';
+                console.log('✅ Main upload area disabled');
+            } else {
+                console.error('❌ Upload area not found in main image section!');
+            }
+        } else {
+            console.error('❌ Main image section not found!');
+        }
+        
+        // Update main image section description
+        const mainImageDesc = document.getElementById('mainImageDescription');
+        if (mainImageDesc) {
+            mainImageDesc.textContent = 'تصاویر مشترک برای همه انواع محصول. برای تصاویر مخصوص هر نوع، از بخش "انواع محصول" استفاده کنید';
+            console.log('✅ Main image description updated for variants');
+        }
+        
+        // Enable variant modal image upload section
+        const variantModal = document.getElementById('variantModal');
+        console.log('🔍 Variant modal found:', !!variantModal);
+        
+        if (variantModal) {
+            const variantImageInput = variantModal.querySelector('#variantImageInput');
+            const variantUploadArea = variantModal.querySelector('.upload-area');
+            console.log('🔍 Variant image input found:', !!variantImageInput);
+            console.log('🔍 Variant upload area found:', !!variantUploadArea);
+            
+            if (variantImageInput) {
+                variantImageInput.disabled = false;
+                console.log('✅ Variant image input enabled');
+            } else {
+                console.error('❌ Variant image input not found!');
+            }
+            
+            if (variantUploadArea) {
+                variantUploadArea.style.opacity = '1';
+                variantUploadArea.style.cursor = 'pointer';
+                variantUploadArea.style.pointerEvents = 'auto';
+                console.log('✅ Variant upload area enabled');
+            } else {
+                console.error('❌ Variant upload area not found!');
+            }
+        } else {
+            console.error('❌ Variant modal not found!');
+        }
+        
+        // ✨ When variants are enabled, refresh category attributes to filter out variant attributes
+        console.log('🔄 Variants enabled - filtering category attributes...');
+        const categorySelect = document.getElementById('id_category');
+        if (categorySelect && categorySelect.value && typeof window.loadCategoryAttributes === 'function') {
+            window.loadCategoryAttributes(categorySelect.value);
+            console.log('✅ Category attributes refreshed to hide variant attributes');
+        }
+    } else {
+        toggleSwitch.style.background = '#ccc';
+        toggleKnob.style.transform = 'translateX(0)';
+
+        
+        // ✨ CRITICAL: Restore main image upload when variants are disabled
+        console.log('🔄 Variants disabled - restoring main image upload...');
+        const mainImageInput = document.getElementById('imageInput');
+        const mainImageSection = document.querySelector('.image-section');
+        console.log('🔍 Restoring main image input found:', !!mainImageInput);
+        console.log('🔍 Restoring main image section found:', !!mainImageSection);
+        
+        if (mainImageInput) {
+            mainImageInput.disabled = false;
+            console.log('✅ Main image input restored');
+        } else {
+            console.error('❌ Main image input not found for restoration!');
+        }
+        
+        if (mainImageSection) {
+            const uploadArea = mainImageSection.querySelector('.upload-area');
+            console.log('🔍 Restoring upload area found:', !!uploadArea);
+            if (uploadArea) {
+                uploadArea.style.opacity = '1';
+                uploadArea.style.cursor = 'pointer';
+                uploadArea.style.pointerEvents = 'auto';
+                console.log('✅ Main upload area restored');
+            } else {
+                console.error('❌ Upload area not found for restoration!');
+            }
+        } else {
+            console.error('❌ Main image section not found for restoration!');
+        }
+        
+        // Update main image section description
+        const mainImageDesc = document.getElementById('mainImageDescription');
+        if (mainImageDesc) {
+            mainImageDesc.textContent = 'تصاویر اصلی که برای همه انواع محصول استفاده می‌شوند';
+            console.log('✅ Main image description restored');
+        }
+        
+        // Disable variant modal image upload section
+        const variantModal = document.getElementById('variantModal');
+        console.log('🔍 Disabling variant modal found:', !!variantModal);
+        
+        if (variantModal) {
+            const variantImageInput = variantModal.querySelector('#variantImageInput');
+            const variantUploadArea = variantModal.querySelector('.upload-area');
+            console.log('🔍 Disabling variant image input found:', !!variantImageInput);
+            console.log('🔍 Disabling variant upload area found:', !!variantUploadArea);
+            
+            if (variantImageInput) {
+                variantImageInput.disabled = true;
+                console.log('✅ Variant image input disabled');
+            } else {
+                console.error('❌ Variant image input not found for disabling!');
+            }
+            
+            if (variantUploadArea) {
+                variantUploadArea.style.opacity = '0.5';
+                variantUploadArea.style.cursor = 'not-allowed';
+                variantUploadArea.style.pointerEvents = 'none';
+                console.log('✅ Variant upload area disabled');
+            } else {
+                console.error('❌ Variant upload area not found for disabling!');
+            }
+        } else {
+            console.error('❌ Variant modal not found for disabling!');
+        }
+        
+        // ✨ NEW: Clear all selected attributes when variants are disabled
+        console.log('🔄 Clearing all selected variant attributes...');
+        const selectedAttributes = document.querySelectorAll('.variant-attribute-item.selected');
+        selectedAttributes.forEach(item => {
+            const itemCheckbox = item.querySelector('input[type="checkbox"]');
+            if (itemCheckbox) {
+                itemCheckbox.checked = false;
+            }
+            item.classList.remove('selected');
+            console.log('✅ Cleared attribute:', item.querySelector('.variant-attribute-name')?.textContent);
+        });
+        
+        // Hide variants management section since no attributes are selected
+        const variantsManagement = document.getElementById('variantsManagement');
+        if (variantsManagement) {
+            variantsManagement.style.display = 'none';
+            console.log('✅ Hidden variants management section');
+        }
+        
+        // ✨ When variants are disabled, show ALL category attributes
+        console.log('🔄 Variants disabled - showing all category attributes...');
+        const categorySelect = document.getElementById('id_category');
+        if (categorySelect && categorySelect.value && typeof window.loadCategoryAttributes === 'function') {
+            window.loadCategoryAttributes(categorySelect.value);
+            console.log('✅ All category attributes displayed');
+        }
+        
+        console.log('✅ All variant attributes cleared successfully');
+    }
+}
+
+// Test function to load category attributes
+function testLoadCategoryAttributes() {
+    console.log('🧪 Testing category attributes loading...');
+    
+    const categorySelect = document.getElementById('id_category');
+    if (categorySelect && categorySelect.value) {
+        console.log('🔍 Selected category:', categorySelect.value);
+        if (typeof window.loadCategoryAttributes === 'function') {
+            window.loadCategoryAttributes(categorySelect.value);
+        } else {
+            console.error('❌ loadCategoryAttributes function not found!');
+        }
+    } else {
+        console.log('⚠️ No category selected. Please select a category first.');
+        alert('لطفا ابتدا دسته‌بندی محصول را انتخاب کنید');
+    }
+}
+
+// Make functions global
+window.toggleVariantsSection = toggleVariantsSection;
+window.testLoadCategoryAttributes = testLoadCategoryAttributes;
+</script>

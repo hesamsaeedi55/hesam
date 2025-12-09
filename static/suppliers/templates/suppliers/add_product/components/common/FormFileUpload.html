@@ -1,0 +1,23 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Reusable File Upload Component -->
+<div class="form-group">
+    <label for="{{ field_id }}">{{ label }}</label>
+    <div class="image-upload">
+        <input type="file" 
+               id="{{ field_id }}" 
+               name="{{ field_name }}" 
+               {% if multiple %}multiple{% endif %}
+               {% if accept %}accept="{{ accept }}"{% endif %}>
+        <div class="upload-area">
+            <svg class="upload-icon" viewBox="0 0 24 24">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            <p>{{ upload_text|default:'برای انتخاب فایل کلیک کنید' }}</p>
+            {% if upload_hint %}<p class="upload-hint">{{ upload_hint }}</p>{% endif %}
+        </div>
+    </div>
+    {% if preview_id %}<div id="{{ preview_id }}" class="current-image" style="margin-top: 10px;"></div>{% endif %}
+    {% if help_text %}<small class="form-text text-muted">{{ help_text }}</small>{% endif %}
+</div>

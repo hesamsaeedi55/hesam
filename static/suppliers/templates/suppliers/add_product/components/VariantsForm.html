@@ -1,0 +1,175 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Product Variants Form Component -->
+<div class="form-section" id="variants-section">
+    <h2 class="section-title">
+        انواع محصول (رنگ، سایز و...)
+        <div class="variants-toggle">
+            <label class="toggle-label">
+                <input type="checkbox" id="has_variants" name="has_variants" {% if existing_variants %}checked{% endif %} onchange="toggleVariantsSection(this)" onclick="console.log('CHECKBOX CLICKED!'); setTimeout(() => { const content = document.getElementById('variants-content'); if(content) content.style.display = this.checked ? 'block' : 'none'; }, 10);">
+                <span class="toggle-switch"></span>
+                این محصول انواع مختلف دارد
+            </label>
+        </div>
+    </h2>
+    <div class="section-content" id="variants-content" style="display: {% if existing_variants %}block{% else %}none{% endif %};">
+        <!-- Variant Attributes Selection -->
+        <div class="variant-attributes-selection">
+            <h3>انتخاب ویژگی‌های متغیر</h3>
+            <p class="description">ویژگی‌هایی که برای این محصول قابل تغییر هستند را انتخاب کنید:</p>
+            <div class="variant-attributes-grid" id="variantAttributesGrid">
+                <div class="variant-attribute-item" onclick="toggleAttributeSelection(this, 'رنگ')">
+                    <input type="checkbox" id="attr_color">
+                    <div class="variant-attribute-info">
+                        <div class="variant-attribute-name">رنگ</div>
+                        <div class="variant-attribute-values">قرمز، آبی، سفید، سیاه، سبز</div>
+                    </div>
+                </div>
+                <div class="variant-attribute-item" onclick="toggleAttributeSelection(this, 'سایز')">
+                    <input type="checkbox" id="attr_size">
+                    <div class="variant-attribute-info">
+                        <div class="variant-attribute-name">سایز</div>
+                        <div class="variant-attribute-values">S، M، L، XL، 2XL</div>
+                    </div>
+                </div>
+                <div class="variant-attribute-item" onclick="toggleAttributeSelection(this, 'جنس')">
+                    <input type="checkbox" id="attr_material">
+                    <div class="variant-attribute-info">
+                        <div class="variant-attribute-name">جنس</div>
+                        <div class="variant-attribute-values">پنبه، پلی‌استر، پشم، ابریشم</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Variant Generator -->
+        <div class="variant-generator" id="variantGenerator">
+            <div class="generator-header">
+                <h3>تولید خودکار انواع محصول</h3>
+                <button type="button" class="btn btn-primary" id="generateVariants">تولید انواع محصول</button>
+            </div>
+            <div class="generator-preview" id="generatorPreview">
+                <!-- Preview of combinations will be shown here -->
+            </div>
+        </div>
+
+        <!-- Variants Management Table -->
+        <div class="variants-management" id="variantsManagement" style="display: none;">
+            <div class="management-header">
+                <h3>مدیریت انواع محصول</h3>
+                <div class="management-actions">
+                    <button type="button" class="btn btn-secondary" onclick="openVariantModalForAdd();">+ افزودن دستی</button>
+                    <button type="button" class="btn btn-warning" id="clearAllVariants">پاک کردن همه</button>
+                </div>
+            </div>
+            <div class="variants-table-container">
+                <table class="variants-table" id="variantsTable">
+                    <thead>
+                        <tr>
+                            <th>کد محصول (SKU)</th>
+                            <th>ویژگی‌ها</th>
+                            <th>قیمت (تومان)</th>
+                            <th>موجودی</th>
+                            <th>وضعیت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="variantsTableBody">
+                        <!-- Variant rows will be added here -->
+                        {% if existing_variants %}
+                            {% for variant in existing_variants %}
+                            <tr>
+                                <td><strong>{{ variant.sku }}</strong></td>
+                                <td>
+                                    <span class="variant-attribute-badge" style="background: {% if variant.color == 'قرمز' %}#dc3545{% elif variant.color == 'آبی' %}#007bff{% elif variant.color == 'سبز' %}#28a745{% elif variant.color == 'زرد' %}#ffc107{% elif variant.color == 'سیاه' %}#343a40{% elif variant.color == 'سفید' %}#6c757d{% elif variant.color == 'صورتی' %}#e83e8c{% elif variant.color == 'نارنجی' %}#fd7e14{% elif variant.color == 'بنفش' %}#6f42c1{% elif variant.color == 'قهوه‌ای' %}#795548{% else %}#6c757d{% endif %}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px;">
+                                        {{ variant.color|default:"نامشخص" }}
+                                    </span>
+                                </td>
+                                <td>{{ variant.size|default:"نامشخص" }}</td>
+                                <td>{{ variant.material|default:"نامشخص" }}</td>
+                                <td>{{ variant.price_toman|floatformat:0|add:" تومان" }}</td>
+                                <td>{{ variant.stock_quantity }}</td>
+                                <td class="variant-status {% if variant.is_active %}active{% else %}inactive{% endif %}">
+                                    {% if variant.is_active %}فعال{% else %}غیرفعال{% endif %}
+                                </td>
+                                <td class="variant-actions">
+                                    <button type="button" class="variant-action-btn edit-variant-btn" onclick="editVariant({{ variant.id }})">ویرایش</button>
+                                    <button type="button" class="variant-action-btn delete-variant-btn" onclick="deleteVariant({{ variant.id }})">حذف</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Variant Form Modal -->
+        <div class="variant-modal" id="variantModal" style="display: none;">
+            <div class="variant-modal-content">
+                <div class="variant-modal-header">
+                    <h3 id="variantModalTitle">افزودن/ویرایش نوع محصول</h3>
+                    <button type="button" class="close-modal" onclick="document.getElementById('variantModal').style.display='none';">&times;</button>
+                </div>
+                <div class="variant-modal-body">
+                    <form id="variantForm">
+                        <input type="hidden" id="variantIndex" value="">
+                        
+                        <div class="form-group">
+                            <label for="variantSku">کد محصول (SKU)</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="text" id="variantSku" class="form-control" required>
+                                <button type="button" class="btn btn-secondary" onclick="
+var productName = document.getElementById('name').value || 'PRODUCT';
+var sku = productName.substring(0, 4).toUpperCase() + '-' + Math.floor(Math.random() * 1000);
+document.getElementById('variantSku').value = sku;
+alert('SKU تولید شد: ' + sku);
+" style="white-space: nowrap;">تولید خودکار</button>
+                            </div>
+                            <small class="form-text">کد یکتا برای این نوع محصول</small>
+                        </div>
+
+                        <div class="variant-attributes" id="variantAttributesForm">
+                            <!-- Dynamic attributes will be loaded here based on selected category -->
+                            <div class="form-group">
+                                <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">
+                                    ابتدا دسته‌بندی محصول را انتخاب کنید تا ویژگی‌های مربوطه نمایش داده شود
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="variantPriceToman">قیمت (تومان)</label>
+                                <input type="text" id="variantPriceToman" class="form-control" oninput="formatNumberWithCommas(this)">
+                                <small class="form-text">خالی بگذارید تا از قیمت اصلی محصول استفاده شود</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="variantStock">موجودی</label>
+                                <input type="number" id="variantStock" class="form-control" min="0" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="variantIsActive" checked>
+                                فعال
+                            </label>
+                        </div>
+
+                        <div class="variant-images">
+                            <label>تصاویر مخصوص این نوع</label>
+                            <input type="file" id="variantImages" multiple accept="image/*">
+                            <div class="variant-image-preview" id="variantImagePreview"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="variant-modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('variantModal').style.display='none';">انصراف</button>
+                    <button type="button" onclick="saveVariant()" class="btn btn-primary">ذخیره محصول</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

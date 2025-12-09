@@ -1,0 +1,256 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Modern Card Component -->
+<div class="modern-card {{ card_class|default:'' }}" {% if id %}id="{{ id }}"{% endif %}>
+    {% if header %}
+    <div class="card-header">
+        {% if icon %}<span class="card-icon">{{ icon }}</span>{% endif %}
+        <h3 class="card-title">{{ title|default:'Card Title' }}</h3>
+        {% if subtitle %}<p class="card-subtitle">{{ subtitle }}</p>{% endif %}
+        {% if actions %}<div class="card-actions">{{ actions }}</div>{% endif %}
+    </div>
+    {% endif %}
+    
+    <div class="card-content">
+        {{ content|default:'Card content goes here' }}
+    </div>
+    
+    {% if footer %}
+    <div class="card-footer">
+        {{ footer }}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.modern-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.modern-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.modern-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+
+.modern-card:hover::before {
+    opacity: 1;
+}
+
+.modern-card.elevated {
+    box-shadow: var(--shadow-lg);
+}
+
+.modern-card.elevated:hover {
+    box-shadow: var(--shadow-xl);
+}
+
+.modern-card.outlined {
+    border: 2px solid var(--border-color);
+    box-shadow: none;
+}
+
+.modern-card.outlined:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+}
+
+.modern-card.flat {
+    border: none;
+    box-shadow: none;
+    background: var(--surface-color);
+}
+
+.modern-card.flat:hover {
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Card Header */
+.card-header {
+    padding: 1.5rem 1.5rem 0 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.card-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+}
+
+.card-title {
+    color: var(--text-color);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    flex: 1;
+}
+
+.card-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0 0;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Card Content */
+.card-content {
+    padding: 0 1.5rem;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.card-content:last-child {
+    padding-bottom: 1.5rem;
+}
+
+/* Card Footer */
+.card-footer {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* Card Variants */
+.modern-card.primary {
+    border-color: var(--primary-color);
+}
+
+.modern-card.primary::before {
+    opacity: 1;
+}
+
+.modern-card.success {
+    border-color: var(--success-color);
+}
+
+.modern-card.success::before {
+    background: linear-gradient(90deg, var(--success-color), #059669);
+    opacity: 1;
+}
+
+.modern-card.warning {
+    border-color: var(--warning-color);
+}
+
+.modern-card.warning::before {
+    background: linear-gradient(90deg, var(--warning-color), #d97706);
+    opacity: 1;
+}
+
+.modern-card.error {
+    border-color: var(--error-color);
+}
+
+.modern-card.error::before {
+    background: linear-gradient(90deg, var(--error-color), #dc2626);
+    opacity: 1;
+}
+
+/* Card Sizes */
+.modern-card.small {
+    padding: 1rem;
+}
+
+.modern-card.small .card-header,
+.modern-card.small .card-content,
+.modern-card.small .card-footer {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.modern-card.large {
+    padding: 2rem;
+}
+
+.modern-card.large .card-header,
+.modern-card.large .card-content,
+.modern-card.large .card-footer {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* Interactive Card */
+.modern-card.interactive {
+    cursor: pointer;
+}
+
+.modern-card.interactive:hover {
+    transform: translateY(-4px);
+}
+
+.modern-card.interactive:active {
+    transform: translateY(-1px);
+}
+
+/* Card Grid */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.card-grid.two-columns {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.card-grid.three-columns {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.card-grid.four-columns {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .card-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+</style>

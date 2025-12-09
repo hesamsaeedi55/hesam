@@ -1,0 +1,193 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Product Variants Form Component -->
+<div class="form-section" id="variants-section">
+    <!-- Debug: Check if this component is loaded -->
+    <div id="variants-debug" style="display: none;">VariantsForm component loaded</div>
+    <h2 class="section-title">
+        انواع محصول (رنگ، سایز و...)
+        <div style="background: yellow; padding: 5px; margin: 5px 0; font-size: 12px;">DEBUG: VariantsForm loaded successfully!</div>
+        <div class="variants-toggle">
+            <label>
+                <input type="checkbox" id="has_variants" name="has_variants" {% if existing_variants %}checked{% endif %} onchange="toggleVariantsSection(this)">
+                این محصول انواع مختلف دارد
+            </label>
+        </div>
+    </h2>
+    <div class="section-content" id="variants-content" style="display: {% if existing_variants %}block{% else %}none{% endif %};">
+        <!-- Variant Attributes Selection -->
+        <div class="variant-attributes-selection">
+            <h3>انتخاب ویژگی‌های متغیر</h3>
+            <p class="description">ویژگی‌هایی که برای این محصول قابل تغییر هستند را انتخاب کنید. این ویژگی‌ها در فرم اصلی محصول غیرفعال می‌شوند:</p>
+            <div class="variant-attributes-grid" id="variantAttributesGrid">
+                <div style="color: var(--text-secondary); text-align: center; padding: 2rem;">
+                    <p>ابتدا دسته‌بندی محصول را انتخاب کنید تا ویژگی‌های مربوطه نمایش داده شود</p>
+                </div>
+            </div>
+            
+            <!-- Selected Variant Attributes Display -->
+            <div id="selectedVariantAttributesDisplay" style="display: none; margin-top: 1rem; padding: 1rem; background: #e8f5e8; border: 1px solid #4caf50; border-radius: 8px;">
+                <h4 style="color: #2e7d32; margin: 0 0 0.5rem 0;">✅ ویژگی‌های انتخاب شده برای انواع محصول:</h4>
+                <div id="selectedVariantAttributesList" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    <!-- Selected attributes will be displayed here -->
+                </div>
+                <p style="color: #2e7d32; font-size: 0.9rem; margin: 0.5rem 0 0 0;">
+                    <strong>توجه:</strong> این ویژگی‌ها در فرم اصلی محصول غیرفعال شده‌اند و فقط در انواع محصول قابل تنظیم هستند.
+                </p>
+            </div>
+        </div>
+
+        <!-- Variant Generator -->
+        <div class="variant-generator" id="variantGenerator" style="display: none;">
+            <div class="generator-header">
+                <h3>تولید خودکار انواع محصول</h3>
+                <button type="button" class="btn btn-primary" id="generateVariants" onmousedown="">تولید انواع محصول</button>
+            </div>
+            <div class="generator-preview" id="generatorPreview">
+                <!-- Preview of combinations will be shown here -->
+            </div>
+        </div>
+
+        <!-- Variants Management Table -->
+        <div class="variants-management" id="variantsManagement" style="display: none;">
+            <div class="management-header">
+                <h3>مدیریت انواع محصول</h3>
+                <div class="management-actions">
+                    <button type="button" class="btn btn-secondary" onmousedown="openVariantModalForAdd()">+ افزودن دستی</button>
+                    <button type="button" class="btn btn-warning" id="clearAllVariants" onmousedown="">پاک کردن همه</button>
+                </div>
+            </div>
+            <div class="variants-table-container">
+                <table class="variants-table" id="variantsTable">
+                    <thead>
+                        <tr>
+                            <th>کد محصول (SKU)</th>
+                            <th>ویژگی‌ها</th>
+                            <th>قیمت (تومان)</th>
+                            <th>موجودی</th>
+                            <th>وضعیت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="variantsTableBody">
+                        <!-- Variant rows will be added here -->
+                        {% if existing_variants %}
+                            {% for variant in existing_variants %}
+                            <tr>
+                                <td><strong>{{ variant.sku }}</strong></td>
+                                <td>
+                                    <span class="variant-attribute-badge" style="background: {% if variant.color == 'قرمز' %}#dc3545{% elif variant.color == 'آبی' %}#007bff{% elif variant.color == 'سبز' %}#28a745{% elif variant.color == 'زرد' %}#ffc107{% elif variant.color == 'سیاه' %}#343a40{% elif variant.color == 'سفید' %}#6c757d{% elif variant.color == 'صورتی' %}#e83e8c{% elif variant.color == 'نارنجی' %}#fd7e14{% elif variant.color == 'بنفش' %}#6f42c1{% elif variant.color == 'قهوه‌ای' %}#795548{% else %}#6c757d{% endif %}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px;">
+                                        {{ variant.color|default:"نامشخص" }}
+                                    </span>
+                                </td>
+                                <td>{{ variant.size|default:"نامشخص" }}</td>
+                                <td>{{ variant.material|default:"نامشخص" }}</td>
+                                <td>{{ variant.price_toman|floatformat:0|add:" تومان" }}</td>
+                                <td>{{ variant.stock_quantity }}</td>
+                                <td class="variant-status {% if variant.is_active %}active{% else %}inactive{% endif %}">
+                                    {% if variant.is_active %}فعال{% else %}غیرفعال{% endif %}{% if variant.is_default %} (پیش‌فرض){% endif %}
+                                </td>
+                                <td class="variant-actions">
+                                    <button type="button" class="variant-action-btn edit-variant-btn" onmousedown="editVariant({{ variant.id }})">ویرایش</button>
+                                    <button type="button" class="variant-action-btn delete-variant-btn" onmousedown="deleteVariant({{ variant.id }})">حذف</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Variant Form Modal -->
+        <div class="variant-modal" id="variantModal" style="display: none;">
+            <div class="variant-modal-content">
+                <div class="variant-modal-header">
+                    <h3 id="variantModalTitle">افزودن/ویرایش نوع محصول</h3>
+                    <button type="button" class="close-modal" onclick="document.getElementById('variantModal').style.display='none';">&times;</button>
+                </div>
+                <div class="variant-modal-body">
+                    <form id="variantForm">
+                        {% csrf_token %}
+                        <input type="hidden" id="variantIndex" value="">
+                        
+                        <div class="form-group">
+                            <label for="variantSku">کد محصول (SKU)</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="text" id="variantSku" class="form-control" required>
+                                <button type="button" class="btn btn-secondary" onclick="
+var productName = document.getElementById('name').value || 'PRODUCT';
+var sku = productName.substring(0, 4).toUpperCase() + '-' + Math.floor(Math.random() * 1000);
+document.getElementById('variantSku').value = sku;
+alert('SKU تولید شد: ' + sku);
+" style="white-space: nowrap;">تولید خودکار</button>
+                            </div>
+                            <small class="form-text">کد یکتا برای این نوع محصول</small>
+                        </div>
+
+                        <div class="variant-attributes" id="variantAttributesForm">
+                            <!-- Dynamic attributes will be loaded here based on selected category -->
+                            <div class="form-group">
+                                <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">
+                                    ابتدا دسته‌بندی محصول را انتخاب کنید تا ویژگی‌های مربوطه نمایش داده شود
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="variantPriceToman">قیمت (تومان)</label>
+                                <input type="text" id="variantPriceToman" class="form-control" oninput="formatNumberWithCommas(this)">
+                                <small class="form-text">خالی بگذارید تا از قیمت اصلی محصول استفاده شود</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="variantStock">موجودی</label>
+                                <input type="number" id="variantStock" class="form-control" min="0" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="variantIsActive" checked>
+                                فعال
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="variantIsDefault">
+                                ترکیب پیش‌فرض
+                            </label>
+                            <small class="form-text">این ترکیب به صورت پیش‌فرض نمایش داده می‌شود</small>
+                        </div>
+
+                        <div class="variant-images">
+                            <label>تصاویر مخصوص این نوع محصول</label>
+                            <p class="form-text">تصاویری که مخصوص این ترکیب ویژگی‌ها هستند (مثلاً تصاویر ساعت قرمز فقط برای ساعت قرمز)</p>
+                            
+                            <!-- Enhanced Upload Area -->
+                            <div class="variant-upload-area" onclick="document.getElementById('variantImages').click()">
+                                <input type="file" id="variantImages" multiple accept="image/*" style="display: none;" onchange="previewVariantImages(this)">
+                                <div class="upload-placeholder">
+                                    <svg style="width: 48px; height: 48px; color: #9ca3af; margin-bottom: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    <p style="margin: 0; color: #6b7280;">انتخاب تصاویر این نوع محصول</p>
+                                    <small style="color: #9ca3af;">PNG, JPG, WebP تا 10MB</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Enhanced Preview Area -->
+                            <div class="variant-image-preview" id="variantImagePreview"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="variant-modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('variantModal').style.display='none';">انصراف</button>
+                    <button type="button" onclick="saveVariant()" class="btn btn-primary">ذخیره محصول</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,74 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div style="padding: 20px; max-width: 1200px; margin: 0 auto; background: #f5f5f5; border-radius: 8px;">
+  <h1 style="color: #000000; text-align: center; margin-bottom: 30px; font-size: 24px;">مدیریت برچسب‌های دسته‌بندی: {{ category.name }}</h1>
+  
+  <div style="background: #ffffff; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e1e5e9; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="color: #000000; border-bottom: 2px solid #3498db; padding-bottom: 10px; font-size: 20px;">📊 آمار</h3>
+    <p style="color: #000000; font-size: 18px; margin: 15px 0; font-weight: 500;"><strong style="color: #000000;">تعداد برچسب‌ها:</strong> <span style="color: #e74c3c; font-weight: bold; font-size: 20px;">{{ current_tags.count }}</span></p>
+    <p style="color: #000000; font-size: 18px; margin: 15px 0; font-weight: 500;"><strong style="color: #000000;">تعداد محصولات:</strong> <span style="color: #27ae60; font-weight: bold; font-size: 20px;">{{ products.count }}</span></p>
+    <p style="color: #000000; font-size: 18px; margin: 15px 0; font-weight: 500;"><strong style="color: #000000;">کل برچسب‌های موجود:</strong> <span style="color: #3498db; font-weight: bold; font-size: 20px;">{{ all_tags.count }}</span></p>
+  </div>
+
+  <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #c3e6cb;">
+    <h3 style="color: #000000; border-bottom: 2px solid #28a745; padding-bottom: 10px; font-size: 20px;">➕ اضافه کردن برچسب‌های جدید</h3>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add_tags">
+      <input type="text" name="tag_names" placeholder="راک, کلاسیک, لوکس" style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; background: #ffffff; color: #000000;">
+      <button type="submit" style="background: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer;">➕ اضافه کردن برچسب‌ها</button>
+    </form>
+  </div>
+
+  <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #ffeaa7;">
+    <h3 style="color: #000000; border-bottom: 2px solid #ffc107; padding-bottom: 10px; font-size: 20px;">🏷️ برچسب‌های فعلی</h3>
+    {% if current_tags %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="remove_tags">
+        {% for tag in current_tags %}
+          <div style="margin: 15px 0; padding: 10px; background: #ffffff; border-radius: 6px; border: 1px solid #e1e5e9;">
+            <input type="checkbox" name="tag_ids" value="{{ tag.id }}" style="margin-right: 10px;">
+            <span style="background: #007bff; color: white; padding: 8px 12px; border-radius: 20px; font-size: 14px; font-weight: bold;">
+              {{ tag.name }} ({{ tag.products.count }} محصول)
+            </span>
+          </div>
+        {% endfor %}
+        <button type="submit" style="background: #dc3545; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer;" onclick="return confirm('آیا از حذف برچسب‌های انتخاب شده اطمینان دارید؟')">🗑️ حذف انتخاب شده‌ها</button>
+      </form>
+    {% else %}
+      <p style="color: #000000; font-style: italic; text-align: center; padding: 20px; background: #ffffff; border-radius: 6px;">هیچ برچسبی برای این دسته‌بندی تعریف نشده است.</p>
+    {% endif %}
+  </div>
+
+  <div style="background: #d1ecf1; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #bee5eb;">
+    <h3 style="color: #000000; border-bottom: 2px solid #17a2b8; padding-bottom: 10px; font-size: 20px;">📋 محصولات دسته‌بندی</h3>
+    {% if products %}
+      {% for product in products %}
+        <div style="background: #ffffff; padding: 20px; margin: 15px 0; border-radius: 8px; border: 1px solid #bee5eb; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <h4 style="color: #000000; margin: 0 0 10px 0; font-size: 18px;">{{ product.name }}</h4>
+          <p style="color: #000000; font-size: 14px; margin: 5px 0;"><strong>شناسه:</strong> <span style="color: #007bff; font-weight: bold;">{{ product.id }}</span></p>
+          {% if product.tags.all %}
+            <p style="margin: 15px 0 0 0;"><strong style="color: #000000;">برچسب‌ها:</strong></p>
+            <div style="margin-top: 10px;">
+              {% for tag in product.tags.all %}
+                <span style="background: #6c757d; color: white; padding: 6px 10px; border-radius: 15px; font-size: 12px; margin: 3px; display: inline-block; font-weight: bold;">{{ tag.name }}</span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color: #000000; font-style: italic; margin: 15px 0 0 0; padding: 10px; background: #f8f9fa; border-radius: 4px;">بدون برچسب</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <p style="color: #000000; font-style: italic; text-align: center; padding: 20px; background: #ffffff; border-radius: 6px;">هیچ محصولی در این دسته‌بندی یافت نشد.</p>
+    {% endif %}
+  </div>
+
+  <div style="text-align: center; margin: 30px 0;">
+    <a href="{% url 'admin:shop_category_changelist' %}" style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 0 10px;">← بازگشت به لیست دسته‌بندی‌ها</a>
+    <a href="{% url 'admin:shop_product_changelist' %}" style="background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 0 10px;">�� مدیریت محصولات</a>
+  </div>
+</div>
+{% endblock %}

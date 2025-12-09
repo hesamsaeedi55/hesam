@@ -1,0 +1,20 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Reusable Form Input Component -->
+<div class="form-group">
+    <label for="{{ field_id }}">{{ label }}{% if required %}<span class="required">*</span>{% endif %}</label>
+    <input type="{{ input_type|default:'text' }}" 
+           id="{{ field_id }}" 
+           name="{{ field_name }}" 
+           {% if required %}required{% endif %}
+           {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+           {% if value %}value="{{ value }}"{% endif %}
+           {% if min %}min="{{ min }}"{% endif %}
+           {% if max %}max="{{ max }}"{% endif %}
+           {% if step %}step="{{ step }}"{% endif %}
+           {% if oninput %}oninput="{{ oninput }}"{% endif %}
+           {% if onblur %}onblur="{{ onblur }}"{% endif %}>
+    {% if help_text %}<small class="form-text text-muted">{{ help_text }}</small>{% endif %}
+    {% if error_message %}<div class="error-message">{{ error_message }}</div>{% endif %}
+</div>

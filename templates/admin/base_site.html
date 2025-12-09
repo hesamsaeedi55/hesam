@@ -1,0 +1,69 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+  .explorer-link {
+    margin-left: 15px;
+    padding: 5px 10px;
+    background-color: #417690;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+  }
+  .explorer-link:hover {
+    background-color: #205067;
+    color: white;
+  }
+  .product-links {
+    margin: 10px 0;
+    display: flex;
+    gap: 10px;
+  }
+</style>
+<script>
+(function() {
+  function resizeCheckboxes() {
+    // Select all checkboxes with the specific classes
+    var checkboxes = document.querySelectorAll('input.card-checkbox.product-checkbox');
+    
+    checkboxes.forEach(function(checkbox) {
+      // Aggressive styling to ensure size increase
+      checkbox.style.width = '50px';
+      checkbox.style.height = '50px';
+      checkbox.style.minWidth = '50px';
+      checkbox.style.minHeight = '50px';
+      checkbox.style.transform = 'scale(2)';
+      checkbox.style.margin = '10px';
+      checkbox.style.cursor = 'pointer';
+    });
+  }
+
+  // Run on initial page load
+  resizeCheckboxes();
+
+  // Also run after a short delay to catch any dynamically loaded content
+  setTimeout(resizeCheckboxes, 500);
+
+  // Add MutationObserver to catch any dynamic changes
+  var observer = new MutationObserver(function(mutations) {
+    resizeCheckboxes();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+})();
+</script>
+{% endblock %}
+
+{% block branding %}
+{{ block.super }}
+<div class="product-links">
+  <a href="{% url 'shop:admin_products_explorer' %}" class="explorer-link">{% trans "Product Explorer" %}</a>
+</div>
+{% endblock %} 

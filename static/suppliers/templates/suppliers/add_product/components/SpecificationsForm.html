@@ -1,0 +1,17 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Specifications Form Component -->
+<div class="form-section">
+    <h2 class="section-title">مشخصات فنی</h2>
+    <div class="section-content">
+        <div class="specs-container" id="specsContainer">
+            <div class="spec-item">
+                <input type="text" placeholder="کلید (مثال: رنگ)" name="spec_key[]">
+                <input type="text" placeholder="مقدار (مثال: قرمز)" name="spec_value[]">
+                <button type="button" class="remove-spec">×</button>
+            </div>
+        </div>
+        <button type="button" class="add-spec">+ افزودن مشخصه</button>
+    </div>
+</div>

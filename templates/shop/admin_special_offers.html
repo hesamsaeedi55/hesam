@@ -1,0 +1,514 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}مدیریت پیشنهادات ویژه - پنل مدیریت{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin-offers.css' %}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <!-- Header Section -->
+    <header class="admin-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="admin-title">
+                    <i class="fas fa-magic"></i>
+                    مدیریت پیشنهادات ویژه
+                </h1>
+                <p class="admin-subtitle">ایجاد و مدیریت تخفیف‌ها و پیشنهادات ویژه</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="openCreateModal()">
+                    <i class="fas fa-plus"></i>
+                    پیشنهاد جدید
+                </button>
+                <button class="btn btn-secondary" onclick="refreshOffers()">
+                    <i class="fas fa-sync-alt"></i>
+                    بروزرسانی
+                </button>
+                <a href="/shop/offers/modern/" class="btn btn-outline" target="_blank">
+                    <i class="fas fa-eye"></i>
+                    مشاهده عمومی
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card active-offers">
+                <div class="stat-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="active-count">0</h3>
+                    <p>پیشنهادات فعال</p>
+                </div>
+            </div>
+            <div class="stat-card total-views">
+                <div class="stat-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="total-views">0</h3>
+                    <p>کل بازدیدها</p>
+                </div>
+            </div>
+            <div class="stat-card total-clicks">
+                <div class="stat-icon">
+                    <i class="fas fa-mouse-pointer"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="total-clicks">0</h3>
+                    <p>کل کلیک‌ها</p>
+                </div>
+            </div>
+            <div class="stat-card revenue">
+                <div class="stat-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="revenue">0</h3>
+                    <p>درآمد تخمینی</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="filter-section">
+        <div class="filter-controls">
+            <div class="filter-group">
+                <label>نوع پیشنهاد:</label>
+                <select id="filter-type" class="form-control">
+                    <option value="">همه انواع</option>
+                    <option value="flash_sale">⚡ فروش ویژه</option>
+                    <option value="discount">💰 تخفیف</option>
+                    <option value="bundle">🎁 پکیج</option>
+                    <option value="free_shipping">📦 ارسال رایگان</option>
+                    <option value="seasonal">🌟 فصلی</option>
+                    <option value="clearance">🏷️ حراج</option>
+                    <option value="coupon">🎫 کوپن</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>وضعیت:</label>
+                <select id="filter-status" class="form-control">
+                    <option value="">همه</option>
+                    <option value="active">فعال</option>
+                    <option value="inactive">غیرفعال</option>
+                    <option value="expired">منقضی</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>نمایش:</label>
+                <select id="filter-display" class="form-control">
+                    <option value="">همه</option>
+                    <option value="hero_banner">بنر اصلی</option>
+                    <option value="carousel">کاروسل</option>
+                    <option value="grid">شبکه‌ای</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <button class="btn btn-outline" onclick="clearFilters()">
+                    <i class="fas fa-times"></i>
+                    پاک کردن فیلترها
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Offers Table -->
+    <section class="offers-section">
+        <div class="table-container">
+            <div id="loading" class="loading-state" style="display: none;">
+                <div class="spinner"></div>
+                <p>در حال بارگذاری پیشنهادات...</p>
+            </div>
+            
+            <div id="offers-table" class="offers-table" style="display: block;">
+                <div class="table-header">
+                    <div class="table-actions">
+                        <button class="btn btn-sm btn-danger" onclick="bulkDelete()" id="bulk-delete" style="display: none;">
+                            <i class="fas fa-trash"></i>
+                            حذف انتخاب شده‌ها
+                        </button>
+                        <button class="btn btn-sm btn-warning" onclick="bulkToggle()" id="bulk-toggle" style="display: none;">
+                            <i class="fas fa-toggle-on"></i>
+                            تغییر وضعیت
+                        </button>
+                    </div>
+                </div>
+                
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th width="50">
+                                <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
+                            </th>
+                            <th width="60">ID</th>
+                            <th width="80">نوع</th>
+                            <th>عنوان</th>
+                            <th width="120">نمایش</th>
+                            <th width="100">محصولات</th>
+                            <th width="100">بازدید</th>
+                            <th width="100">کلیک</th>
+                            <th width="120">وضعیت</th>
+                            <th width="150">اعمال</th>
+                        </tr>
+                    </thead>
+                    <tbody id="offers-tbody">
+                        <!-- Static test offers -->
+                        <tr>
+                            <td>
+                                <input type="checkbox" value="4">
+                            </td>
+                            <td>
+                                <span style="font-weight: 600; color: #4299e1;">#4</span>
+                            </td>
+                            <td>
+                                <span class="offer-type-badge flash_sale">⚡ فروش ویژه</span>
+                            </td>
+                            <td>
+                                <div style="max-width: 200px;">
+                                    <div style="font-weight: 600; margin-bottom: 4px;">Flash Sale - 50% Off!</div>
+                                    <div style="color: #718096; font-size: 0.9rem;">Limited time offer</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge">بنر اصلی</span>
+                            </td>
+                            <td>
+                                <button class="product-count-btn" title="مدیریت محصولات">
+                                    <i class="fas fa-box"></i>
+                                    <span style="font-weight: 600;">1 محصول</span>
+                                </button>
+                            </td>
+                            <td>
+                                <span style="color: #4299e1; font-weight: 600;">0</span>
+                            </td>
+                            <td>
+                                <span style="color: #48bb78; font-weight: 600;">0</span>
+                            </td>
+                            <td>
+                                <span class="status-badge active">فعال</span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-primary" onclick="editOffer(5)" title="ویرایش">
+                                        <i class="fas fa-edit"></i>
+                                        ویرایش
+                                    </button>
+                                    <button class="btn btn-sm btn-info" title="مدیریت محصولات">
+                                        <i class="fas fa-box"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" title="تغییر وضعیت">
+                                        <i class="fas fa-toggle-on"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="checkbox" value="5">
+                            </td>
+                            <td>
+                                <span style="font-weight: 600; color: #4299e1;">#5</span>
+                            </td>
+                            <td>
+                                <span class="offer-type-badge seasonal">🌟 فصلی</span>
+                            </td>
+                            <td>
+                                <div style="max-width: 200px;">
+                                    <div style="font-weight: 600; margin-bottom: 4px;">Seasonal Discount</div>
+                                    <div style="color: #718096; font-size: 0.9rem;">Winter sale</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge">کاروسل</span>
+                            </td>
+                            <td>
+                                <button class="product-count-btn" title="مدیریت محصولات">
+                                    <i class="fas fa-box"></i>
+                                    <span style="font-weight: 600;">5 محصول</span>
+                                </button>
+                            </td>
+                            <td>
+                                <span style="color: #4299e1; font-weight: 600;">0</span>
+                            </td>
+                            <td>
+                                <span style="color: #48bb78; font-weight: 600;">0</span>
+                            </td>
+                            <td>
+                                <span class="status-badge active">فعال</span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-primary" onclick="editOffer(5)" title="ویرایش">
+                                        <i class="fas fa-edit"></i>
+                                        ویرایش
+                                    </button>
+                                    <button class="btn btn-sm btn-info" title="مدیریت محصولات">
+                                        <i class="fas fa-box"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" title="تغییر وضعیت">
+                                        <i class="fas fa-toggle-on"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <i class="fas fa-gift empty-icon"></i>
+                <h3>هیچ پیشنهادی موجود نیست</h3>
+                <p>برای شروع، اولین پیشنهاد ویژه خود را ایجاد کنید</p>
+                <button class="btn btn-primary" onclick="openCreateModal()">
+                    <i class="fas fa-plus"></i>
+                    ایجاد پیشنهاد جدید
+                </button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Create Modal -->
+<div id="offer-modal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 id="modal-title">ایجاد پیشنهاد جدید</h2>
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="offer-form" class="modal-body">
+            <div class="form-grid">
+                <!-- Basic Info -->
+                <div class="form-section">
+                    <h3>اطلاعات پایه</h3>
+                    
+                    <div class="form-group">
+                        <label for="title">عنوان پیشنهاد *</label>
+                        <input type="text" id="title" name="title" class="form-control" required 
+                               placeholder="مثال: فروش ویژه ۵۰٪ تخفیف">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">توضیحات</label>
+                        <textarea id="description" name="description" class="form-control" rows="3"
+                                  placeholder="توضیح کوتاهی از پیشنهاد"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="offer_type">نوع پیشنهاد *</label>
+                            <select id="offer_type" name="offer_type" class="form-control" required>
+                                <option value="">انتخاب کنید</option>
+                                <option value="flash_sale">⚡ فروش ویژه</option>
+                                <option value="discount">💰 تخفیف</option>
+                                <option value="bundle">🎁 پکیج</option>
+                                <option value="free_shipping">📦 ارسال رایگان</option>
+                                <option value="seasonal">🌟 فصلی</option>
+                                <option value="clearance">🏷️ حراج</option>
+                                <option value="coupon">🎫 کوپن</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="display_style">نحوه نمایش *</label>
+                            <select id="display_style" name="display_style" class="form-control" required>
+                                <option value="">انتخاب کنید</option>
+                                <option value="hero_banner">بنر اصلی</option>
+                                <option value="carousel">کاروسل</option>
+                                <option value="grid">شبکه‌ای</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time Settings -->
+                <div class="form-section">
+                    <h3>تنظیمات زمانی</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="valid_from">شروع از *</label>
+                            <input type="datetime-local" id="valid_from" name="valid_from" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valid_until">پایان (اختیاری)</label>
+                            <input type="datetime-local" id="valid_until" name="valid_until" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Banner Settings -->
+                <div class="form-section">
+                    <h3>تنظیمات بنر</h3>
+                    
+                    <div class="form-group">
+                        <label for="banner_image">تصویر بنر</label>
+                        <input type="file" id="banner_image" name="banner_image" class="form-control" accept="image/*">
+                        <small class="form-help">فرمت‌های مجاز: JPG, PNG, WebP</small>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="banner_action_type">نوع عملکرد</label>
+                            <select id="banner_action_type" name="banner_action_type" class="form-control">
+                                <option value="none">بدون عملکرد</option>
+                                <option value="product">محصول</option>
+                                <option value="category">دسته‌بندی</option>
+                                <option value="url">لینک خارجی</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="banner_external_url">لینک خارجی</label>
+                            <input type="url" id="banner_external_url" name="banner_external_url" 
+                                   class="form-control" placeholder="https://example.com">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Settings -->
+                <div class="form-section">
+                    <h3>تنظیمات وضعیت</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="display_order">ترتیب نمایش</label>
+                            <input type="number" id="display_order" name="display_order" 
+                                   class="form-control" value="1" min="1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="enabled" name="enabled" checked>
+                                    <span class="checkmark"></span>
+                                    فعال
+                                </label>
+                                
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="is_active" name="is_active" checked>
+                                    <span class="checkmark"></span>
+                                    قابل نمایش
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                انصراف
+            </button>
+            <button type="button" class="btn btn-primary" onclick="saveOffer()">
+                <i class="fas fa-save"></i>
+                ذخیره
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Products Modal -->
+<div id="products-modal" class="modal-overlay">
+    <div class="modal-container large">
+        <div class="modal-header">
+            <h2>مدیریت محصولات پیشنهاد</h2>
+            <button class="modal-close" onclick="closeProductsModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="products-section">
+                <div class="section-header">
+                    <h3>انتخاب محصولات</h3>
+                    <div class="product-controls">
+                        <input type="text" id="product-search" placeholder="جستجو محصولات..." 
+                               class="form-control" style="width: 300px; margin-left: 10px;"
+                               onkeyup="adminOffers.searchProducts(this.value)">
+                        <button class="btn btn-sm btn-primary" onclick="adminOffers.selectAllProducts()">
+                            <i class="fas fa-check-square"></i>
+                            انتخاب همه
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="adminOffers.clearSelection()">
+                            <i class="fas fa-times"></i>
+                            پاک کردن انتخاب
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="products-list" class="products-list">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeProductsModal()">
+                بستن
+            </button>
+            <button type="button" class="btn btn-primary" onclick="saveProducts()">
+                <i class="fas fa-save"></i>
+                ذخیره محصولات
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- CSRF Token -->
+{% csrf_token %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="{% static 'js/admin-offers.js' %}?v=20250830210400"></script>
+<script>
+
+    // Simple working edit function for static buttons
+    function editOffer(offerId) {
+        if (window.adminOffers) {
+            window.adminOffers.editOffer(offerId);
+        } else {
+            console.log('AdminOffersManager not available, using fallback');
+            // Fallback for static buttons
+            const modal = document.getElementById('offer-modal');
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+                document.getElementById('modal-title').textContent = 'ویرایش پیشنهاد';
+            }
+        }
+    }
+    
+    // Initialize admin interface (if available)
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof AdminOffersManager !== 'undefined') {
+            window.adminOffers = new AdminOffersManager();
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,567 @@
+.image-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box;
+    position: relative !important;
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 2rem !important;
+    margin-bottom: 1.5rem !important;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: var(--transition);
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+.image-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.image-section:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+
+.image-section label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+
+.image-upload {
+    border: 3px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    transition: var(--transition);
+    background: rgba(108, 92, 231, 0.05);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.image-upload input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.image-upload:hover {
+    border-color: var(--primary-color);
+    background: rgba(108, 92, 231, 0.1);
+}
+
+.upload-area {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1.5rem;
+    pointer-events: none;
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+}
+
+.upload-area > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.upload-icon {
+    width: 40px;
+    height: 40px;
+    fill: var(--primary-color);
+    opacity: 0.8;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.upload-area p {
+    margin: 0;
+    font-size: 16px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.upload-hint {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+    display: block;
+    text-align: center;
+    width: 100%;
+}
+
+.image-upload:hover .upload-icon {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.current-image {
+    margin-top: 10px;
+}
+
+.current-image img {
+    max-width: 200px;
+    border-radius: var(--border-radius);
+    border: 2px solid var(--border-color);
+}
+
+/* Image preview styles - OPTIMIZED FOR DRAG AND DROP */
+.image-preview {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 0.5rem 0;
+}
+
+.image-preview-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+    display: inline-block;
+    cursor: move;
+    user-select: none;
+    /* NO transitions during drag */
+    transition: none;
+}
+
+.image-preview-item img {
+    display: block;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+/* Drag states - REMOVED to prevent flashing */
+
+.image-preview-item .remove-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.image-preview-item .remove-btn:hover {
+    background: rgba(239, 68, 68, 1);
+    transform: scale(1.1);
+}
+
+/* Simple hover effects */
+.image-preview-item:hover .remove-btn {
+    background: rgba(255, 0, 0, 0.9);
+}
+
+/* Priority labels */
+.priority-label {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 5;
+    font-family: 'Inter', monospace;
+}
+
+/* Primary indicator */
+.primary-indicator {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 215, 0, 0.9);
+    color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 12px;
+    z-index: 5;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Upload area drag feedback */
+.upload-area::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: var(--border-radius);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.image-upload.drag-over .upload-area::before {
+    opacity: 1;
+}
+
+/* Drag instruction text */
+.upload-area p:last-child {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+.image-upload.drag-over .upload-area p:last-child {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Drop preview styles */
+.drop-preview {
+    width: 150px;
+    height: 150px;
+    border: 2px dashed var(--primary-color);
+    border-radius: 8px;
+    background: rgba(99, 102, 241, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+    flex-shrink: 0;
+    opacity: 0.8;
+    transform: scale(1);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.drop-preview::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    opacity: 0.3;
+}
+
+/* Force full width for image section - override any grid constraints */
+.form-grid .image-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    grid-column: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    flex: none !important;
+    position: relative !important;
+    padding: 2rem !important;
+    margin-bottom: 2rem !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Ensure image upload takes full width */
+.image-section .image-upload {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Simple Upload Container - FORCE CENTER */
+.upload-container {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: relative !important;
+}
+
+.upload-area {
+    text-align: center !important;
+    padding: 4rem 6rem !important;
+    border: 3px dashed var(--border-color) !important;
+    border-radius: var(--border-radius) !important;
+    background: var(--card-bg) !important;
+    cursor: pointer !important;
+    transition: var(--transition) !important;
+    width: 600px !important;
+    max-width: 600px !important;
+    min-width: 600px !important;
+    margin: 0 auto !important;
+    display: block !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.upload-area:hover {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.upload-area p {
+    color: var(--text-color);
+    margin-bottom: 2rem;
+    font-size: 1.3rem;
+    font-weight: 500;
+}
+
+.upload-area button {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: var(--transition);
+    box-shadow: var(--shadow-md);
+    min-width: 150px;
+}
+
+.upload-area button:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.upload-box {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    background: var(--card-bg);
+    border: 3px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: var(--transition);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.upload-box:hover {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.05);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.upload-box input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.upload-content {
+    position: relative;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.upload-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1.5rem;
+    color: var(--primary-color);
+    opacity: 0.8;
+    transition: var(--transition);
+}
+
+.upload-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.upload-box:hover .upload-icon {
+    opacity: 1;
+    transform: scale(1.1);
+    color: var(--secondary-color);
+}
+
+.upload-content h3 {
+    color: var(--text-color);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.upload-content p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.upload-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.upload-info span {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.upload-btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-md);
+    pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.upload-btn:hover::before {
+    left: 100%;
+}
+
+.upload-btn:active {
+    transform: translateY(0);
+}
+
+/* Drag and Drop States */
+.upload-box.drag-over {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.15);
+    transform: scale(1.02);
+}
+
+.upload-box.drag-over .upload-icon {
+    color: var(--primary-color);
+    transform: scale(1.2);
+}
+
+.upload-box.drag-over h3 {
+    color: var(--primary-color);
+}
+
+/* Drag and Drop States for Upload Area - NO MOVEMENT */
+.upload-area.drag-over {
+    border-color: #3182ce !important;
+    background: rgba(49, 130, 206, 0.1) !important;
+    /* NO transform or scale - prevents jumping */
+}
+
+.upload-area.drag-over p {
+    color: #3182ce !important;
+}
+
+/* Disable ALL transitions during drag */
+.upload-area.dragging,
+.upload-area.drag-over,
+.upload-area.dragging *,
+.upload-area.drag-over * {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .upload-area {
+        padding: 2rem 1.5rem;
+        min-width: 300px;
+        max-width: 100%;
+    }
+    
+    .upload-area p {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .upload-area button {
+        padding: 0.8rem 2rem;
+        font-size: 1rem;
+        min-width: 120px;
+    }
+}

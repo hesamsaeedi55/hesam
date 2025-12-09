@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پیشنهادات ویژه - فروشگاه عینک</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .action-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            margin-bottom: 40px;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, #ff6b6b, #feca57, #ff9ff3);
+            border-radius: 30px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hero-text {
+            flex: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .hero-timer {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px 20px;
+            border-radius: 15px;
+            color: white;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-icon {
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.8);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Offers Grid */
+        .offers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .offer-card {
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .offer-card:hover {
+            transform: translateY(-15px) rotate(1deg);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .offer-card-header {
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .offer-card-header.flash-sale {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+        }
+
+        .offer-card-header.discount {
+            background: linear-gradient(135deg, #51cf66, #40c057);
+        }
+
+        .offer-card-header.bundle {
+            background: linear-gradient(135deg, #339af0, #228be6);
+        }
+
+        .offer-card-header.free-shipping {
+            background: linear-gradient(135deg, #ff8f3f, #ff6b3f);
+        }
+
+        .offer-card-header.seasonal {
+            background: linear-gradient(135deg, #f06292, #e91e63);
+        }
+
+        .offer-card-header.clearance {
+            background: linear-gradient(135deg, #78909c, #546e7a);
+        }
+
+        .offer-floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .floating-circle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        .floating-circle:nth-child(1) {
+            width: 40px;
+            height: 40px;
+            top: 10%;
+            right: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-circle:nth-child(2) {
+            width: 25px;
+            height: 25px;
+            top: 60%;
+            right: 70%;
+            animation-delay: 1s;
+        }
+
+        .floating-circle:nth-child(3) {
+            width: 35px;
+            height: 35px;
+            top: 30%;
+            right: 80%;
+            animation-delay: 2s;
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .offer-card-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            color: white;
+            z-index: 2;
+        }
+
+        .offer-card-body {
+            padding: 25px;
+        }
+
+        .offer-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .offer-description {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .offer-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-count {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .offer-arrow {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .offer-card:hover .offer-arrow {
+            transform: scale(1.2);
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header-title {
+                font-size: 2rem;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-card {
+                padding: 25px;
+            }
+
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .offers-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .close:hover {
+            color: #2d3748;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #51cf66, #40c057);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div>
+                    <h1 class="header-title">پیشنهادات ویژه 🔥</h1>
+                    <p class="header-subtitle">بهترین تخفیف‌ها و پیشنهادات امروز</p>
+                </div>
+                <div class="header-actions">
+                    <button class="action-btn" onclick="refreshOffers()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="action-btn" onclick="showFilters()">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                    <button class="action-btn" onclick="showNotifications()">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="content" style="display: none;">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div id="hero-offer" class="hero-card">
+                    <!-- Hero content will be dynamically loaded -->
+                </div>
+            </section>
+
+            <!-- Offers Grid -->
+            <section id="offers-grid" class="offers-grid">
+                <!-- Offer cards will be dynamically loaded -->
+            </section>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="scrollToTop()">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- Modal -->
+    <div id="offerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modal-body">
+                <!-- Modal content will be dynamically loaded -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // API Configuration
+        const API_BASE = 'http://localhost:8000/shop/api';
+        
+        // State Management
+        let currentOffers = [];
+        let selectedOffer = null;
+
+        // Initialize Page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSpecialOffers();
+            setupEventListeners();
+        });
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Modal close
+            document.querySelector('.close').onclick = closeModal;
+            window.onclick = function(event) {
+                const modal = document.getElementById('offerModal');
+                if (event.target === modal) {
+                    closeModal();
+                }
+            }
+
+            // Smooth scrolling
+            document.addEventListener('scroll', handleScroll);
+        }
+
+        // API Functions
+        async function loadSpecialOffers() {
+            try {
+                showLoading(true);
+                
+                const response = await fetch(`${API_BASE}/special-offers/`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentOffers = data.offers;
+                    renderOffers(data.offers);
+                    showToast('پیشنهادات با موفقیت بارگذاری شد!');
+                } else {
+                    throw new Error('Failed to load offers');
+                }
+            } catch (error) {
+                console.error('Error loading offers:', error);
+                showError('خطا در بارگذاری پیشنهادات');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function trackOfferClick(offerId) {
+            try {
+                await fetch(`${API_BASE}/special-offers/${offerId}/click/`, {
+                    method: 'POST'
+                });
+            } catch (error) {
+                console.error('Error tracking click:', error);
+            }
+        }
+
+        // Render Functions
+        function renderOffers(offers) {
+            if (offers.length === 0) {
+                document.getElementById('content').innerHTML = `
+                    <div style="text-align: center; padding: 50px;">
+                        <i class="fas fa-gift" style="font-size: 4rem; color: #64748b; margin-bottom: 20px;"></i>
+                        <h2 style="color: #64748b;">هیچ پیشنهاد ویژه‌ای در حال حاضر موجود نیست</h2>
+                    </div>
+                `;
+                return;
+            }
+
+            // Render hero offer
+            const heroOffer = offers.find(offer => offer.display_style === 'hero_banner') || offers[0];
+            renderHeroOffer(heroOffer);
+
+            // Render other offers
+            const otherOffers = offers.filter(offer => offer.id !== heroOffer.id);
+            renderOfferCards(otherOffers);
+        }
+
+        function renderHeroOffer(offer) {
+            const heroElement = document.getElementById('hero-offer');
+            const remainingTime = offer.remaining_time;
+            
+            heroElement.innerHTML = `
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <span class="hero-badge">${getOfferTypeBadge(offer.offer_type)}</span>
+                        <h2 class="hero-title">${offer.title}</h2>
+                        <p class="hero-description">${offer.description}</p>
+                        ${remainingTime ? `
+                            <div class="hero-timer">
+                                <i class="fas fa-clock" style="margin-left: 8px;"></i>
+                                <span id="countdown-${offer.id}">${formatTime(remainingTime)}</span>
+                            </div>
+                        ` : `
+                            <div class="hero-timer">
+                                <i class="fas fa-box" style="margin-left: 8px;"></i>
+                                ${offer.products.length} محصول در این پیشنهاد
+                            </div>
+                        `}
+                    </div>
+                    <div>
+                        <i class="hero-icon ${getOfferIcon(offer.offer_type)}"></i>
+                    </div>
+                </div>
+            `;
+
+            heroElement.onclick = () => openOfferModal(offer);
+
+            // Start countdown if needed
+            if (remainingTime) {
+                startCountdown(offer.id, remainingTime);
+            }
+        }
+
+        function renderOfferCards(offers) {
+            const gridElement = document.getElementById('offers-grid');
+            
+            gridElement.innerHTML = offers.map(offer => `
+                <div class="offer-card" onclick="openOfferModal(${JSON.stringify(offer).replace(/"/g, '&quot;')})">
+                    <div class="offer-card-header ${offer.offer_type}">
+                        <div class="offer-floating-shapes">
+                            <div class="floating-circle"></div>
+                            <div class="floating-circle"></div>
+                            <div class="floating-circle"></div>
+                        </div>
+                        <i class="offer-card-icon ${getOfferIcon(offer.offer_type)}"></i>
+                    </div>
+                    <div class="offer-card-body">
+                        <h3 class="offer-title">${offer.title}</h3>
+                        <p class="offer-description">${offer.description}</p>
+                        <div class="offer-stats">
+                            <span class="product-count">${offer.products.length} محصول</span>
+                            <div class="offer-arrow">
+                                <i class="fas fa-arrow-left"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Utility Functions
+        function getOfferTypeBadge(type) {
+            const badges = {
+                'flash_sale': '⚡ فروش ویژه',
+                'discount': '💰 تخفیف',
+                'bundle': '🎁 پکیج',
+                'free_shipping': '📦 ارسال رایگان',
+                'seasonal': '🌟 فصلی',
+                'clearance': '🏷️ حراج',
+                'coupon': '🎫 کوپن'
+            };
+            return badges[type] || '✨ ویژه';
+        }
+
+        function getOfferIcon(type) {
+            const icons = {
+                'flash_sale': 'fas fa-bolt',
+                'discount': 'fas fa-percentage',
+                'bundle': 'fas fa-gift',
+                'free_shipping': 'fas fa-shipping-fast',
+                'seasonal': 'fas fa-leaf',
+                'clearance': 'fas fa-tags',
+                'coupon': 'fas fa-ticket-alt'
+            };
+            return icons[type] || 'fas fa-star';
+        }
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            return `${hours}:${minutes.toString().padStart(2, '0')}`;
+        }
+
+        function startCountdown(offerId, remainingTime) {
+            const element = document.getElementById(`countdown-${offerId}`);
+            if (!element) return;
+
+            let timeLeft = remainingTime;
+            const timer = setInterval(() => {
+                timeLeft -= 1;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    element.textContent = 'منقضی شده';
+                    return;
+                }
+                element.textContent = formatTime(timeLeft);
+            }, 1000);
+        }
+
+        // Modal Functions
+        function openOfferModal(offer) {
+            trackOfferClick(offer.id);
+            
+            const modal = document.getElementById('offerModal');
+            const modalBody = document.getElementById('modal-body');
+            
+            modalBody.innerHTML = `
+                <h2 style="margin-bottom: 20px; color: #2d3748;">${offer.title}</h2>
+                <p style="color: #64748b; line-height: 1.6; margin-bottom: 20px;">${offer.description}</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                    ${offer.products.slice(0, 6).map(product => `
+                        <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; text-align: center;">
+                            <img src="${product.product.images[0]?.url || ''}" 
+                                 alt="${product.product.name}" 
+                                 style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">
+                            <h4 style="font-size: 0.9rem; margin-bottom: 5px;">${product.product.name}</h4>
+                            <div style="color: #ef4444; font-weight: 600;">${product.discount_display}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div style="text-align: center;">
+                    <button onclick="viewAllProducts(${offer.id})" 
+                            style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                        مشاهده همه محصولات (${offer.products.length})
+                    </button>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('offerModal').style.display = 'none';
+        }
+
+        function viewAllProducts(offerId) {
+            // Navigate to products page
+            window.location.href = `/products?offer=${offerId}`;
+        }
+
+        // UI Functions
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'flex' : 'none';
+            document.getElementById('content').style.display = show ? 'none' : 'block';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function showError(message) {
+            showToast(message, 'error');
+        }
+
+        // Action Functions
+        function refreshOffers() {
+            loadSpecialOffers();
+        }
+
+        function showFilters() {
+            showToast('فیلترها به زودی اضافه خواهند شد!');
+        }
+
+        function showNotifications() {
+            showToast('اعلان‌ها به زودی اضافه خواهند شد!');
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function handleScroll() {
+            const fab = document.querySelector('.fab');
+            if (window.scrollY > 300) {
+                fab.style.opacity = '1';
+            } else {
+                fab.style.opacity = '0.7';
+            }
+        }
+    </script>
+</body>
+</html>

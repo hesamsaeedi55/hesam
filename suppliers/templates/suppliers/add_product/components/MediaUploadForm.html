@@ -1,0 +1,21 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Media Upload Form Component -->
+<div class="image-section">
+    <label>تصاویر اصلی محصول</label>
+    <p class="form-text" id="mainImageDescription">تصاویر اصلی که برای همه انواع محصول استفاده می‌شوند</p>
+    
+    <!-- Simple Upload Area -->
+    <div style="width: 100%; text-align: center; padding: 2rem;">
+        <input type="file" id="imageInput" name="all_images" multiple accept="image/*" style="display: none;">
+        <div class="upload-area" style="border: 3px dashed #4a5568; border-radius: 8px; padding: 4rem 6rem; background: #2d3748; cursor: pointer; width: 1000px; margin: 0 auto; position: relative;" 
+             onclick="document.getElementById('imageInput').click()">
+            <p style="font-size: 1.3rem; margin-bottom: 2rem; color: #e2e8f0;">برای انتخاب تصاویر کلیک کنید یا فایل‌ها را اینجا بکشید</p>
+            <button type="button" style="background: #3182ce; color: white; border: none; padding: 1rem 2.5rem; border-radius: 4px; cursor: pointer; font-size: 1.1rem;" onclick="event.stopPropagation(); document.getElementById('imageInput').click()">انتخاب فایل</button>
+        </div>
+    </div>
+    
+    <!-- Image Preview Area -->
+    <div class="image-preview" id="imagePreviews"></div>
+</div>

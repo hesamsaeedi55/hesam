@@ -1,0 +1,288 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}پیشنهادات ویژه - فروشگاه عینک{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/modern-offers.css' %}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    /* Toast Notifications */
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #51cf66, #40c057);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        z-index: 1001;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+    }
+
+    .toast.show {
+        transform: translateX(0);
+    }
+
+    .toast-error {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    }
+
+    .toast-warning {
+        background: linear-gradient(135deg, #feca57, #ff9f43);
+    }
+
+    .toast-info {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    /* Scroll to top button */
+    #scroll-to-top {
+        position: fixed;
+        bottom: 30px;
+        left: 30px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        box-shadow: var(--shadow-soft);
+        transition: var(--transition);
+        opacity: 0;
+        visibility: hidden;
+        z-index: 1000;
+    }
+
+    #scroll-to-top.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    #scroll-to-top:hover {
+        transform: scale(1.1);
+        box-shadow: var(--shadow-medium);
+    }
+
+    /* Button Styles */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 1rem;
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Filter Buttons */
+    .filter-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 30px 0;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 10px 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 25px;
+        background: white;
+        color: #64748b;
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        border-color: #667eea;
+        background: var(--primary-gradient);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Product Price Styles */
+    .product-price {
+        margin-top: 8px;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: #a0aec0;
+        font-size: 0.9rem;
+        margin-left: 8px;
+    }
+
+    .discounted-price,
+    .current-price {
+        color: #2d3748;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    /* Modal Specific Styles */
+    .modal-header {
+        text-align: center;
+        border-bottom: 2px solid #f7fafc;
+        padding-bottom: 20px;
+    }
+
+    .modal-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 10px;
+    }
+
+    .modal-description {
+        color: #64748b;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="offers-container">
+    <!-- Modern Header -->
+    <header class="modern-header">
+        <div class="header-flex">
+            <div>
+                <h1 class="header-title">پیشنهادات ویژه 🔥</h1>
+                <p class="header-subtitle">بهترین تخفیف‌ها و پیشنهادات امروز را از دست ندهید</p>
+            </div>
+            <div class="header-actions">
+                <button class="action-button" id="refresh-offers" title="بروزرسانی">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="action-button" onclick="showFilters()" title="فیلترها">
+                    <i class="fas fa-filter"></i>
+                </button>
+                <button class="action-button" onclick="showNotifications()" title="اعلان‌ها">
+                    <i class="fas fa-bell"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Filter Buttons -->
+    <div class="filter-container">
+        <button class="filter-btn active" data-filter="all">همه پیشنهادات</button>
+        <button class="filter-btn" data-filter="flash_sale">⚡ فروش ویژه</button>
+        <button class="filter-btn" data-filter="discount">💰 تخفیفات</button>
+        <button class="filter-btn" data-filter="bundle">🎁 پکیج‌ها</button>
+        <button class="filter-btn" data-filter="free_shipping">📦 ارسال رایگان</button>
+        <button class="filter-btn" data-filter="seasonal">🌟 فصلی</button>
+    </div>
+
+    <!-- Main Content Container -->
+    <div id="offers-container">
+        <!-- Hero Offer Section -->
+        <section class="hero-offer">
+            <div id="hero-offer">
+                <!-- Hero content will be dynamically loaded -->
+            </div>
+        </section>
+
+        <!-- Offers Section -->
+        <section class="offers-section">
+            <h2 class="section-title">سایر پیشنهادات ویژه</h2>
+            <div id="offers-grid" class="offers-grid">
+                <!-- Offer cards will be dynamically loaded -->
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Scroll to Top Button -->
+<button id="scroll-to-top" onclick="offersManager.scrollToTop()">
+    <i class="fas fa-chevron-up"></i>
+</button>
+
+<!-- Modal will be created dynamically by JavaScript -->
+
+<!-- CSRF Token for AJAX requests -->
+{% csrf_token %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/modern-offers.js' %}"></script>
+<script>
+    // Additional page-specific JavaScript
+    function showFilters() {
+        offersManager.showToast('فیلترهای پیشرفته به زودی اضافه خواهند شد!', 'info');
+    }
+
+    function showNotifications() {
+        offersManager.showToast('سیستم اعلان‌ها به زودی راه‌اندازی خواهد شد!', 'info');
+    }
+
+    // Setup filter buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                filterButtons.forEach(b => b.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Apply filter
+                const filter = this.dataset.filter;
+                if (window.offersManager) {
+                    offersManager.filterOffers(filter);
+                }
+            });
+        });
+    });
+
+    // Handle page visibility change to refresh offers
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && window.offersManager) {
+            // Refresh offers when user returns to tab
+            setTimeout(() => {
+                offersManager.refreshOffers();
+            }, 1000);
+        }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + R for refresh
+        if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+            e.preventDefault();
+            if (window.offersManager) {
+                offersManager.refreshOffers();
+            }
+        }
+    });
+</script>
+{% endblock %}

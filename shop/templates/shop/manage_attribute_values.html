@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت مقادیر ویژگی - {{ attribute.label_fa }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .add-value-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .add-value-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .add-value-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .add-value-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .values-section {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .values-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .values-header h3 {
+            font-size: 1.3rem;
+            font-weight: 400;
+        }
+
+        .values-list {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .value-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.3s ease;
+            cursor: move;
+            background: white;
+        }
+
+        .value-item:hover {
+            background: #f8f9fa;
+            transform: translateX(-5px);
+        }
+
+        .value-item:last-child {
+            border-bottom: none;
+        }
+
+        .value-item.sortable-ghost {
+            opacity: 0.5;
+            background: #e9ecef;
+        }
+
+        .value-item.sortable-drag {
+            transform: rotate(5deg);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .drag-handle {
+            color: #6c757d;
+            margin-left: 15px;
+            font-size: 1.2rem;
+            cursor: move;
+        }
+
+        .value-text {
+            flex: 1;
+            font-size: 1.1rem;
+            color: #495057;
+        }
+
+        .value-order {
+            background: #e9ecef;
+            color: #6c757d;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            margin-left: 15px;
+        }
+
+        .value-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .add-value-form {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .value-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .value-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="{% url 'shop:manage_category_attributes' attribute.category.id %}" class="back-button">
+                ← بازگشت
+            </a>
+            <h1>مدیریت مقادیر ویژگی</h1>
+            <div class="subtitle">{{ attribute.label_fa }} ({{ attribute.key }})</div>
+        </div>
+
+        <div class="content">
+            <!-- Add New Value Section -->
+            <div class="add-value-section">
+                <h3 style="margin-bottom: 20px; color: #495057;">افزودن مقدار جدید</h3>
+                <form class="add-value-form" id="addValueForm">
+                    <input type="text" 
+                           class="add-value-input" 
+                           id="newValueInput" 
+                           placeholder="مقدار جدید را وارد کنید..."
+                           maxlength="100">
+                    <button type="submit" class="btn btn-primary">افزودن</button>
+                </form>
+            </div>
+
+            <!-- Values List Section -->
+            <div class="values-section">
+                <div class="values-header">
+                    <h3>مقادیر موجود ({{ values.count }})</h3>
+                </div>
+                
+                {% if values %}
+                    <ul class="values-list" id="valuesList">
+                        {% for value in values %}
+                        <li class="value-item" data-value-id="{{ value.id }}" data-order="{{ value.display_order }}">
+                            <div class="drag-handle">⋮⋮</div>
+                            <div class="value-text">{{ value.value }}</div>
+                            <div class="value-order">ترتیب: {{ value.display_order }}</div>
+                            <div class="value-actions">
+                                <button class="btn btn-danger" onclick="deleteValue({{ value.id }}, '{{ value.value }}')">
+                                    حذف
+                                </button>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <h3>هیچ مقداری تعریف نشده</h3>
+                        <p>برای شروع، اولین مقدار را اضافه کنید</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        // Initialize Sortable for drag and drop
+        const valuesList = document.getElementById('valuesList');
+        if (valuesList) {
+            new Sortable(valuesList, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: function(evt) {
+                    updateValuesOrder();
+                }
+            });
+        }
+
+        // Add new value
+        document.getElementById('addValueForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('Form submitted');
+            
+            const input = document.getElementById('newValueInput');
+            const value = input.value.trim();
+            console.log('Value to add:', value);
+            
+            if (!value) {
+                showAlert('لطفاً مقداری وارد کنید', 'error');
+                return;
+            }
+            
+            try {
+                console.log('Sending fetch request...');
+                const response = await fetch('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        action: 'add_value',
+                        value: value
+                    })
+                });
+                
+                console.log('Response received:', response);
+                console.log('Response status:', response.status);
+                
+                const result = await response.json();
+                console.log('Response data:', result);
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    input.value = '';
+                    refreshPage();
+                } else {
+                    showAlert(result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error in form submission:', error);
+                showAlert('خطا در ارتباط با سرور', 'error');
+            }
+        });
+
+        // Update values order after drag and drop
+        async function updateValuesOrder() {
+            const items = document.querySelectorAll('.value-item');
+            const orderData = Array.from(items).map((item, index) => ({
+                id: parseInt(item.getAttribute('data-value-id')),
+                order: index + 1
+            }));
+            
+            try {
+                const response = await fetch('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        action: 'reorder_values',
+                        order: orderData
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    // Update order numbers in the UI
+                    items.forEach((item, index) => {
+                        item.setAttribute('data-order', index + 1);
+                        item.querySelector('.value-order').textContent = `ترتیب: ${index + 1}`;
+                    });
+                } else {
+                    showAlert(result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('خطا در ارتباط با سرور', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // Delete value
+        async function deleteValue(valueId, valueName) {
+            if (!confirm(`آیا از حذف مقدار "${valueName}" اطمینان دارید؟`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        action: 'delete_value',
+                        id: valueId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    refreshPage();
+                } else {
+                    showAlert(result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('خطا در ارتباط با سرور', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // Show alert message
+        function showAlert(message, type) {
+            // Remove existing alerts
+            const existingAlert = document.querySelector('.alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+            
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            const content = document.querySelector('.content');
+            content.insertBefore(alert, content.firstChild);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Refresh page
+        function refreshPage() {
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }
+
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

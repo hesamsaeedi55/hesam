@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت ویژگی‌های دسته‌بندی {{ category.name }}</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #1f2937;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .actions-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background: #059669;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #047857;
+        }
+        
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: #6b7280;
+            border: 2px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+        
+        .attributes-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .attribute-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .attribute-card:hover {
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border-color: #2563eb;
+        }
+        
+        .attribute-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+        
+        .attribute-info {
+            flex: 1;
+        }
+        
+        .attribute-key {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+            font-family: 'Courier New', monospace;
+            background: #f3f4f6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .attribute-label {
+            font-size: 1rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+        
+        .attribute-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .meta-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-type {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .badge-required {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-order {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+        
+        .attribute-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .attribute-values {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .values-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .values-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .values-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .value-tag {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+        
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .actions-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .attribute-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 مدیریت ویژگی‌های دسته‌بندی</h1>
+            <p>{{ category.name }} - شناسه: {{ category.id }}</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ attributes|length }}</div>
+                <div class="stat-label">ویژگی‌ها</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ category.get_product_count|default:0 }}</div>
+                <div class="stat-label">محصولات</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ attributes|length|add:0 }}</div>
+                <div class="stat-label">ویژگی‌های فعال</div>
+            </div>
+        </div>
+
+        <!-- Actions Bar -->
+        <div class="actions-bar">
+            <div>
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    ➕ افزودن ویژگی جدید
+                </button>
+                <button class="btn btn-outline" onclick="refreshAttributes()">
+                    🔄 بروزرسانی
+                </button>
+            </div>
+            <div>
+                <a href="{% url 'admin:shop_categoryattribute_changelist' %}?category__id__exact={{ category.id }}" 
+                   class="btn btn-outline" target="_blank">
+                    📊 مشاهده در ادمین
+                </a>
+                <a href="{% url 'admin:shop_category_change' category.id %}" 
+                   class="btn btn-outline" target="_blank">
+                    ⚙️ تنظیمات دسته‌بندی
+                </a>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div id="alert-container"></div>
+
+        <!-- Attributes Grid -->
+        <div id="attributes-container" class="attributes-grid">
+            {% if attributes %}
+                {% for attr in attributes %}
+                <div class="attribute-card" data-attribute-id="{{ attr.id }}" data-order="{{ attr.display_order }}">
+                    <div class="attribute-header">
+                        <div class="attribute-info">
+                            <div class="attribute-key">{{ attr.key }}</div>
+                            <div class="attribute-label">{{ attr.label_fa }}</div>
+                            <div class="attribute-meta">
+                                <span class="meta-badge badge-type">{{ attr.get_type_display }}</span>
+                                {% if attr.required %}
+                                <span class="meta-badge badge-required">ضروری</span>
+                                {% endif %}
+                                <span class="meta-badge badge-order">ترتیب: {{ attr.display_order }}</span>
+                            </div>
+                        </div>
+                        <div class="attribute-actions">
+                            <button class="btn btn-outline" onclick="editAttribute({{ attr.id }})">
+                                ✏️ ویرایش
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteAttribute({{ attr.id }}, '{{ attr.key }}')">
+                                🗑️ حذف
+                            </button>
+                            <label class="switch" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+                                <input type="checkbox" class="display-switch" id="display-switch-{{ attr.id }}" data-attribute-id="{{ attr.id }}" {% if attr.is_displayed_in_product %}checked{% endif %} onchange="toggleDisplayInProduct(this)"/>
+                                <span class="switch-label" id="display-switch-label-{{ attr.id }}">{% if attr.is_displayed_in_product %}👁️ نمایش در محصول{% else %}👁️‍🗨️ مخفی از محصول{% endif %}</span>
+                            </label>
+                            <label class="switch" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+                                <input type="checkbox" class="basket-switch" id="basket-switch-{{ attr.id }}" data-attribute-id="{{ attr.id }}" {% if attr.display_in_basket %}checked{% endif %} onchange="toggleDisplayInBasket(this)"/>
+                                <span class="switch-label" id="basket-switch-label-{{ attr.id }}">{% if attr.display_in_basket %}🛒 نمایش در سبد{% else %}🛒 مخفی از سبد{% endif %}</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="attribute-values">
+                        <div class="values-header">
+                            <span class="values-title">مقادیر پیش‌فرض:</span>
+                            <button class="btn btn-success" onclick="manageValues({{ attr.id }})">
+                                🔧 مدیریت مقادیر
+                            </button>
+                        </div>
+                        {% if attr.values_list %}
+                        <div class="values-list">
+                            {% for value in attr.values_list %}
+                            <span class="value-tag">
+                                {{ value.value }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div style="color: #6b7280; font-style: italic; padding: 0.5rem 0;">
+                            هیچ مقداری تعریف نشده - برای افزودن کلیک کنید
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📝</div>
+                    <h3>هیچ ویژگی‌ای تعریف نشده</h3>
+                    <p>برای شروع، اولین ویژگی را اضافه کنید</p>
+                    <button class="btn btn-primary" onclick="openAddModal()">
+                        افزودن ویژگی اول
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Add/Edit Attribute Modal -->
+    <div id="attributeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle" class="modal-title">افزودن ویژگی جدید</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <form id="attributeForm">
+                <input type="hidden" id="attributeId" name="id">
+                
+                <div class="form-group">
+                    <label for="attributeKey" class="form-label">کلید ویژگی (انگلیسی) *</label>
+                    <input type="text" id="attributeKey" name="key" class="form-input" 
+                           placeholder="مثال: brand, color, size" required>
+                    <small style="color: #6b7280; font-size: 0.85rem;">
+                        فقط حروف انگلیسی، اعداد و زیرخط مجاز است
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="attributeLabel" class="form-label">برچسب نمایش (فارسی) *</label>
+                    <input type="text" id="attributeLabel" name="label_fa" class="form-input" 
+                           placeholder="مثال: برند، رنگ، اندازه" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="attributeType" class="form-label">نوع ویژگی</label>
+                    <select id="attributeType" name="type" class="form-select">
+                        {% for type_code, type_name in attribute_types %}
+                        <option value="{{ type_code }}">{{ type_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="attributeRequired" class="form-label">
+                        <input type="checkbox" id="attributeRequired" name="required" class="form-checkbox">
+                        ویژگی ضروری است
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="attributeDisplayInProduct" class="form-label">
+                        <input type="checkbox" id="attributeDisplayInProduct" name="is_displayed_in_product" class="form-checkbox" checked>
+                        نمایش در صفحه محصول
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="attributeDisplayInBasket" class="form-label">
+                        <input type="checkbox" id="attributeDisplayInBasket" name="display_in_basket" class="form-checkbox">
+                        نمایش در سبد خرید (حداکثر 2 توصیه می‌شود)
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="attributeOrder" class="form-label">ترتیب نمایش</label>
+                    <input type="number" id="attributeOrder" name="display_order" class="form-input" 
+                           value="0" min="0">
+                </div>
+            </form>
+            
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal()">انصراف</button>
+                <button id="saveButton" class="btn btn-primary" onclick="saveAttribute()">ذخیره</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAttributeId = null;
+        let isEditing = false;
+
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alert-container');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            alertContainer.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        function openModal() {
+            document.getElementById('attributeModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('attributeModal').classList.remove('show');
+            resetForm();
+        }
+
+        function openAddModal() {
+            isEditing = false;
+            currentAttributeId = null;
+            document.getElementById('modalTitle').textContent = 'افزودن ویژگی جدید';
+            document.getElementById('saveButton').textContent = 'افزوده';
+            openModal();
+        }
+
+        function editAttribute(attributeId) {
+            isEditing = true;
+            currentAttributeId = attributeId;
+            
+            const attributeCard = document.querySelector(`[data-attribute-id="${attributeId}"]`);
+            const key = attributeCard.querySelector('.attribute-key').textContent;
+            const label = attributeCard.querySelector('.attribute-label').textContent;
+            const type = attributeCard.querySelector('.badge-type').textContent;
+            const required = attributeCard.querySelector('.badge-required') !== null;
+            const order = attributeCard.querySelector('.badge-order').textContent.replace('ترتیب: ', '');
+            const displayInProduct = document.getElementById(`display-switch-${attributeId}`).checked;
+            const displayInBasket = document.getElementById(`basket-switch-${attributeId}`).checked;
+            
+            document.getElementById('attributeId').value = attributeId;
+            document.getElementById('attributeKey').value = key;
+            document.getElementById('attributeLabel').value = label;
+            document.getElementById('attributeType').value = getTypeCode(type);
+            document.getElementById('attributeRequired').checked = required;
+            document.getElementById('attributeDisplayInProduct').checked = displayInProduct;
+            document.getElementById('attributeDisplayInBasket').checked = displayInBasket;
+            document.getElementById('attributeOrder').value = order;
+            
+            document.getElementById('modalTitle').textContent = 'ویرایش ویژگی';
+            document.getElementById('saveButton').textContent = 'بروزرسانی';
+            openModal();
+        }
+
+        function getTypeCode(typeName) {
+            const typeMap = {
+                'Text Input': 'text',
+                'Number Input': 'number',
+                'Single Selection': 'select',
+                'Multiple Selection': 'multiselect',
+                'Yes/No': 'boolean'
+            };
+            return typeMap[typeName] || 'text';
+        }
+
+        function resetForm() {
+            document.getElementById('attributeForm').reset();
+            document.getElementById('attributeId').value = '';
+        }
+
+        async function saveAttribute() {
+            const form = document.getElementById('attributeForm');
+            const formData = new FormData(form);
+            
+            const data = {
+                action: isEditing ? 'update_attribute' : 'add_attribute',
+                key: formData.get('key'),
+                label_fa: formData.get('label_fa'),
+                type: formData.get('type'),
+                required: formData.get('required') === 'on',
+                is_displayed_in_product: formData.get('is_displayed_in_product') === 'on',
+                display_in_basket: formData.get('display_in_basket') === 'on',
+                display_order: parseInt(formData.get('display_order')) || 0
+            };
+            
+            if (isEditing) {
+                data.id = currentAttributeId;
+            }
+            
+            try {
+                const response = await fetch(`{% url 'shop:manage_category_attributes' category.id %}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    closeModal();
+                    refreshAttributes();
+                } else {
+                    showAlert(result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('خطا در ارتباط با سرور', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        async function deleteAttribute(attributeId, attributeName) {
+            if (!confirm(`آیا از حذف ویژگی "${attributeName}" اطمینان دارید؟`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`{% url 'shop:manage_category_attributes' category.id %}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        action: 'delete_attribute',
+                        id: attributeId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    refreshAttributes();
+                } else {
+                    showAlert(result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('خطا در ارتباط با سرور', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        function refreshAttributes() {
+            window.location.reload();
+        }
+
+        function manageValues(attributeId) {
+            window.open(`{% url 'shop:manage_attribute_values' 0 %}`.replace('0', attributeId), '_blank');
+        }
+
+        async function toggleDisplayInProduct(el) {
+            const attributeId = el.getAttribute('data-attribute-id');
+            const newState = !!el.checked;
+            
+            try {
+                const response = await fetch(`{% url 'shop:manage_category_attributes' category.id %}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        action: 'toggle_display_in_product',
+                        id: attributeId,
+                        is_displayed_in_product: newState
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    const label = document.getElementById(`display-switch-label-${attributeId}`);
+                    if (label) {
+                        label.textContent = newState ? '👁️ نمایش در محصول' : '👁️‍🗨️ مخفی از محصول';
+                    }
+                } else {
+                    showAlert(result.error, 'error');
+                    // Revert UI on failure
+                    el.checked = !newState;
+                }
+            } catch (error) {
+                showAlert('خطا در ارتباط با سرور', 'error');
+                console.error('Error:', error);
+                // Revert UI on failure
+                el.checked = !newState;
+            }
+        }
+
+        async function toggleDisplayInBasket(el) {
+            const attributeId = el.getAttribute('data-attribute-id');
+            const newState = !!el.checked;
+            
+            try {
+                const response = await fetch(`{% url 'shop:manage_category_attributes' category.id %}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        action: 'toggle_display_in_basket',
+                        id: attributeId,
+                        display_in_basket: newState
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    const label = document.getElementById(`basket-switch-label-${attributeId}`);
+                    if (label) {
+                        label.textContent = newState ? '🛒 نمایش در سبد' : '🛒 مخفی از سبد';
+                    }
+                } else {
+                    showAlert(result.error, 'error');
+                    el.checked = !newState; // Revert the checkbox
+                }
+            } catch (error) {
+                showAlert('خطا در ارتباط با سرور', 'error');
+                el.checked = !newState; // Revert the checkbox
+                console.error('Error:', error);
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

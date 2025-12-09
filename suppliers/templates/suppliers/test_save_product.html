@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Save Product - Simple Form</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .form-container {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        
+        .submit-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+            text-align: center;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            min-width: 150px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .test-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+        
+        .test-btn:hover {
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+        }
+        
+        .debug-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .debug-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .debug-log {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .status {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Test Save Product</h1>
+            <p>Simple form to test product saving functionality</p>
+        </div>
+        
+        <div class="form-container">
+            <form method="post" enctype="multipart/form-data" id="test_product_form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="name">نام محصول *</label>
+                    <input type="text" id="name" name="name" required placeholder="نام محصول را وارد کنید">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">توضیحات محصول</label>
+                    <textarea id="description" name="description" placeholder="توضیحات محصول را وارد کنید"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="price_toman">قیمت (تومان) *</label>
+                    <input type="number" id="price_toman" name="price_toman" required min="0" placeholder="قیمت محصول">
+                </div>
+                
+                <div class="form-group">
+                    <label for="stock_quantity">موجودی *</label>
+                    <input type="number" id="stock_quantity" name="stock_quantity" required min="0" placeholder="تعداد موجودی">
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">دسته‌بندی *</label>
+                    <select id="category" name="category" required onchange="updateCategoryLinks(this.value)">
+                        <option value="">انتخاب دسته‌بندی</option>
+                        <option value="1037">ساعت</option>
+                        <option value="1045">دسته‌بندی 1045</option>
+                        <option value="1">لباس</option>
+                        <option value="2">کفش</option>
+                        <option value="3">اکسسوری</option>
+                    </select>
+                    <div id="category-links" style="margin-top: 10px; display: none;">
+                        <a href="#" id="category-admin-link" target="_blank" style="color: #667eea; text-decoration: none; margin-right: 15px;">
+                            🔧 مدیریت دسته‌بندی
+                        </a>
+                        <a href="#" id="attribute-manage-link" target="_blank" style="color: #667eea; text-decoration: none;">
+                            ⚙️ مدیریت ویژگی‌ها
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="brand">برند</label>
+                    <input type="text" id="brand" name="brand" placeholder="نام برند">
+                </div>
+                
+                <div class="form-group">
+                    <label for="brand_image">تصویر برند</label>
+                    <input type="file" id="brand_image" name="brand_image" accept="image/*">
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="is_active" name="is_active" checked>
+                        <label for="is_active">محصول فعال است</label>
+                    </div>
+                </div>
+                
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn" name="_save">💾 ذخیره محصول</button>
+                    <button type="button" class="submit-btn test-btn" onclick="testFormSubmission()">🧪 تست فرم</button>
+                </div>
+            </form>
+            
+            <div class="debug-section">
+                <h3>🔍 Debug Information</h3>
+                <div id="status-messages"></div>
+                <div class="debug-log" id="debug-log">Ready to test...\n</div>
+            </div>
+            
+            <div class="debug-section">
+                <h3>🔗 Quick Admin Links</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                    <a href="http://127.0.0.1:8000/admin/shop/category/1045/change/" target="_blank" style="color: #667eea; text-decoration: none; padding: 10px; border: 1px solid #e1e5e9; border-radius: 8px; display: block; background: #f0f8ff;">
+                        🎯 Category 1045 (Direct)
+                    </a>
+                    <a href="http://127.0.0.1:8000/admin/shop/category/" target="_blank" style="color: #667eea; text-decoration: none; padding: 10px; border: 1px solid #e1e5e9; border-radius: 8px; display: block;">
+                        📁 All Categories
+                    </a>
+                    <a href="http://127.0.0.1:8000/admin/shop/categoryattribute/?category__id=1045" target="_blank" style="color: #667eea; text-decoration: none; padding: 10px; border: 1px solid #e1e5e9; border-radius: 8px; display: block;">
+                        ⚙️ Category 1045 Attributes
+                    </a>
+                    <a href="http://127.0.0.1:8000/admin/shop/categoryattribute/" target="_blank" style="color: #667eea; text-decoration: none; padding: 10px; border: 1px solid #e1e5e9; border-radius: 8px; display: block;">
+                        ⚙️ All Category Attributes
+                    </a>
+                    <a href="http://127.0.0.1:8000/admin/shop/product/" target="_blank" style="color: #667eea; text-decoration: none; padding: 10px; border: 1px solid #e1e5e9; border-radius: 8px; display: block;">
+                        📦 All Products
+                    </a>
+                    <a href="http://127.0.0.1:8000/admin/" target="_blank" style="color: #667eea; text-decoration: none; padding: 10px; border: 1px solid #e1e5e9; border-radius: 8px; display: block;">
+                        🏠 Django Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Debug logging function
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('debug-log');
+            const statusElement = document.getElementById('status-messages');
+            
+            // Add to debug log
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            // Add status message
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusElement.appendChild(statusDiv);
+            
+            // Keep only last 5 status messages
+            const statusMessages = statusElement.querySelectorAll('.status');
+            if (statusMessages.length > 5) {
+                statusMessages[0].remove();
+            }
+            
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        // Test form submission function
+        function testFormSubmission() {
+            log('🧪 Starting form test...', 'info');
+            
+            const form = document.getElementById('test_product_form');
+            const formData = new FormData(form);
+            
+            // Log form data
+            log('📋 Form data collected:', 'info');
+            for (let [key, value] of formData.entries()) {
+                if (key === 'brand_image' && value instanceof File) {
+                    log(`  ${key}: [File] ${value.name} (${value.size} bytes)`, 'info');
+                } else {
+                    log(`  ${key}: ${value}`, 'info');
+                }
+            }
+            
+            // Validate required fields
+            const requiredFields = ['name', 'price_toman', 'stock_quantity', 'category'];
+            let isValid = true;
+            
+            for (let field of requiredFields) {
+                const value = formData.get(field);
+                if (!value || value.trim() === '') {
+                    log(`❌ Required field missing: ${field}`, 'error');
+                    isValid = false;
+                } else {
+                    log(`✅ Field OK: ${field} = ${value}`, 'success');
+                }
+            }
+            
+            if (!isValid) {
+                log('❌ Form validation failed', 'error');
+                return;
+            }
+            
+            log('✅ Form validation passed', 'success');
+            log('🚀 Form is ready for submission!', 'success');
+        }
+        
+        // Form submission handler
+        async function handleFormSubmit(event) {
+            log('🚀 Form submission started', 'info');
+            event.preventDefault(); // Prevent normal form submission
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            // Log submission details
+            log(`📤 Submitting to: ${form.action}`, 'info');
+            log(`📋 Method: ${form.method}`, 'info');
+            log(`📋 Enctype: ${form.enctype}`, 'info');
+            
+            // Log form data
+            log('📋 Form data:', 'info');
+            for (let [key, value] of formData.entries()) {
+                if (key === 'brand_image' && value instanceof File) {
+                    log(`  ${key}: [File] ${value.name} (${value.size} bytes)`, 'info');
+                } else {
+                    log(`  ${key}: ${value}`, 'info');
+                }
+            }
+            
+            // Disable submit button
+            const submitBtn = form.querySelector('button[name="_save"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'در حال ذخیره...';
+            }
+            
+            try {
+                // Submit via AJAX
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                const data = await response.json();
+                log(`📥 Response received: ${response.status}`, 'info');
+                
+                if (data.success) {
+                    log(`✅ ${data.message}`, 'success');
+                    log(`🆔 Product ID: ${data.product_id}`, 'success');
+                    
+                    // Show success message
+                    alert(`✅ ${data.message}`);
+                    
+                    // Reset form
+                    form.reset();
+                    document.getElementById('debug-log').textContent = 'Form reset - ready for next test...\n';
+                    document.getElementById('status-messages').innerHTML = '';
+                    
+                } else {
+                    log(`❌ Error: ${data.error}`, 'error');
+                    alert(`❌ Error: ${data.error}`);
+                }
+                
+            } catch (error) {
+                log(`❌ AJAX Error: ${error.message}`, 'error');
+                alert(`❌ AJAX Error: ${error.message}`);
+            } finally {
+                // Re-enable submit button
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '💾 ذخیره محصول';
+                }
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Page loaded successfully', 'success');
+            
+            const form = document.getElementById('test_product_form');
+            if (form) {
+                log('✅ Form found, attaching submit handler', 'success');
+                form.addEventListener('submit', handleFormSubmit);
+                
+                // Add click listeners to buttons
+                const submitBtn = form.querySelector('button[name="_save"]');
+                const testBtn = form.querySelector('button[onclick="testFormSubmission()"]');
+                
+                if (submitBtn) {
+                    submitBtn.addEventListener('click', function(e) {
+                        log('🔘 Save button clicked', 'info');
+                    });
+                }
+                
+                if (testBtn) {
+                    testBtn.addEventListener('click', function(e) {
+                        log('🔘 Test button clicked', 'info');
+                    });
+                }
+                
+                log('✅ Event listeners attached', 'success');
+            } else {
+                log('❌ Form not found!', 'error');
+            }
+        });
+        
+        // Update category management links
+        function updateCategoryLinks(categoryId) {
+            const categoryLinksDiv = document.getElementById('category-links');
+            const categoryAdminLink = document.getElementById('category-admin-link');
+            const attributeManageLink = document.getElementById('attribute-manage-link');
+            
+            if (categoryId && categoryId !== '') {
+                // Show the links
+                categoryLinksDiv.style.display = 'block';
+                
+                // Update category admin link
+                categoryAdminLink.href = `http://127.0.0.1:8000/admin/shop/category/${categoryId}/change/`;
+                
+                // Update attribute management link - using category ID to find attributes
+                // This will take you to the category's attribute management page
+                attributeManageLink.href = `http://127.0.0.1:8000/admin/shop/categoryattribute/?category__id=${categoryId}`;
+                
+                log(`🔗 Category links updated for category ID: ${categoryId}`, 'info');
+                log(`🔗 Category admin: http://127.0.0.1:8000/admin/shop/category/${categoryId}/change/`, 'info');
+                log(`🔗 Category attributes: http://127.0.0.1:8000/admin/shop/categoryattribute/?category__id=${categoryId}`, 'info');
+            } else {
+                // Hide the links
+                categoryLinksDiv.style.display = 'none';
+            }
+        }
+        
+        // Test if JavaScript is working
+        log('🧪 JavaScript is working!', 'success');
+    </script>
+</body>
+</html>

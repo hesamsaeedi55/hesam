@@ -1,0 +1,199 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Add Product" %}</title>
+    
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://unpkg.com/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{% static 'suppliers/templates/suppliers/add_product/styles/main.css' %}">
+    
+    <!-- External Scripts -->
+    <script src="{% static 'shop/js/product_tags.js' %}"></script>
+    <script src="{% static 'shop/js/image_editor.js' %}"></script>
+    
+    <!-- Data Scripts -->
+    <script id="category-tags-data" type="application/json">
+        {{ category_tags|safe }}
+    </script>
+    
+    <script id="selected-tags-data" type="application/json">
+        {{ selected_tags|safe }}
+    </script>
+    
+    <script id="existing-variants-data" type="application/json">
+        {{ existing_variants_json|safe }}
+    </script>
+    
+    <script id="product-images-data" type="application/json">
+        {{ product_images|safe }}
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="form-card">
+            <div class="form-header">
+                <div>
+                    <h1>{% if is_edit %}ویرایش محصول{% else %}افزودن محصول جدید{% endif %}</h1>
+                    <p>{% if is_edit %}اطلاعات محصول را ویرایش کنید{% else %}اطلاعات محصول جدید را وارد کنید{% endif %}</p>
+                </div>
+                <div class="theme-toggle" onclick="toggleTheme()">
+                    <i class="theme-icon">🌙</i>
+                    <span>تغییر تم</span>
+                </div>
+            </div>
+
+            <form method="post" action="{% url 'suppliers:add_product' %}" enctype="multipart/form-data" id="product_form" novalidate>
+                {% csrf_token %}
+                {% if is_edit %}
+                <input type="hidden" name="is_edit" value="true">
+                <input type="hidden" id="product_id" name="product_id" value="{{ product.id }}">
+                {% endif %}
+                
+                <div class="form-grid">
+                    <!-- Include Form Components -->
+                    {% include 'suppliers/add_product/components/ProductInfoForm.html' %}
+                    {% include 'suppliers/add_product/components/CategoryTagsForm.html' %}
+                    {% include 'suppliers/add_product/components/PricingForm.html' %}
+                    {% include 'suppliers/add_product/components/InventoryForm.html' %}
+                    {% include 'suppliers/add_product/components/VariantsForm.html' %}
+                    {% include 'suppliers/add_product/components/MediaUploadForm.html' %}
+                    {% include 'suppliers/add_product/components/SpecificationsForm.html' %}
+                    {% include 'suppliers/add_product/components/AttributesForm.html' %}
+                </div>
+
+                <div class="submit-row">
+                    <input type="submit" name="_save" value="ذخیره محصول" class="submit-btn" onclick="handleSaveClick(this); return false;">
+                    {% if not is_edit %}
+                    <button type="button" onclick="testFormSubmission()" class="submit-btn" style="background: orange;">تست ارسال فرم</button>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Crop Modal -->
+    <div class="crop-modal">
+        <div class="crop-modal-content">
+            <div class="crop-container">
+                <img id="cropImage" src="" alt="Image to crop">
+            </div>
+            <div class="crop-controls">
+                <button class="crop-cancel-btn">انصراف</button>
+                <button class="crop-save-btn">ذخیره</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load JavaScript Services -->
+    <script src="{% static 'suppliers/templates/suppliers/add_product/utils/formUtils.js' %}"></script>
+    <script src="{% static 'suppliers/templates/suppliers/add_product/validation/productValidation.js' %}"></script>
+    <script src="{% static 'suppliers/templates/suppliers/add_product/services/productFormService.js' %}"></script>
+    
+    <!-- Initialize Form -->
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const icon = document.querySelector('.theme-icon');
+            icon.textContent = document.body.classList.contains('light-theme') ? '☀️' : '🌙';
+        }
+        
+        // Initialize form components
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize image upload
+            if (typeof initImageUpload === 'function') {
+                initImageUpload();
+            }
+            
+            // Initialize variant management
+            if (typeof initVariantManagement === 'function') {
+                initVariantManagement();
+            }
+            
+            // Initialize category attributes loading
+            if (typeof loadCategoryAttributes === 'function') {
+                const categorySelect = document.getElementById('id_category');
+                if (categorySelect) {
+                    categorySelect.addEventListener('change', function() {
+                        loadCategoryAttributes(this.value);
+                    });
+                }
+            }
+            
+            // Initialize specifications management
+            initSpecificationsManagement();
+        });
+        
+        // Specifications management
+        function initSpecificationsManagement() {
+            const specsContainer = document.getElementById('specsContainer');
+            const addSpecBtn = document.querySelector('.add-spec');
+            
+            if (addSpecBtn) {
+                addSpecBtn.addEventListener('click', function() {
+                    const specItem = document.createElement('div');
+                    specItem.className = 'spec-item';
+                    specItem.innerHTML = `
+                        <input type="text" placeholder="کلید (مثال: رنگ)" name="spec_key[]">
+                        <input type="text" placeholder="مقدار (مثال: قرمز)" name="spec_value[]">
+                        <button type="button" class="remove-spec">×</button>
+                    `;
+                    specsContainer.appendChild(specItem);
+                });
+            }
+            
+            // Remove spec functionality
+            if (specsContainer) {
+                specsContainer.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('remove-spec')) {
+                        e.target.closest('.spec-item').remove();
+                    }
+                });
+            }
+        }
+        
+        // Test form submission
+        function testFormSubmission() {
+            console.log('🧪 Testing form submission...');
+            
+            const form = document.getElementById('product_form');
+            if (!form) {
+                console.log('❌ Form not found!');
+                return;
+            }
+
+            // Fill required fields
+            const nameField = form.querySelector('input[name="name"]');
+            const categoryField = form.querySelector('select[name="category"]');
+            const priceField = form.querySelector('input[name="price_toman"]');
+
+            if (nameField) nameField.value = 'Test Product ' + new Date().toISOString();
+            if (categoryField) categoryField.value = '1036'; // Use a valid category ID
+            if (priceField) priceField.value = '100000';
+
+            console.log('✅ Required fields filled');
+
+            // Submit the form
+            const submitButton = form.querySelector('input[name="_save"]');
+            if (submitButton) {
+                console.log('🔄 Clicking save button...');
+                submitButton.click();
+            } else {
+                console.log('❌ Save button not found!');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Modern Input Component -->
+<div class="modern-input-group {{ group_class|default:'' }}">
+    {% if label %}
+    <label for="{{ field_id }}" class="modern-label">
+        {{ label }}
+        {% if required %}<span class="required">*</span>{% endif %}
+        {% if help_text %}<span class="help-text">{{ help_text }}</span>{% endif %}
+    </label>
+    {% endif %}
+    
+    <div class="input-wrapper">
+        {% if icon_left %}<span class="input-icon left">{{ icon_left }}</span>{% endif %}
+        
+        <input type="{{ input_type|default:'text' }}" 
+               id="{{ field_id }}" 
+               name="{{ field_name }}" 
+               class="modern-input {{ input_class|default:'' }}"
+               {% if required %}required{% endif %}
+               {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+               {% if value %}value="{{ value }}"{% endif %}
+               {% if min %}min="{{ min }}"{% endif %}
+               {% if max %}max="{{ max }}"{% endif %}
+               {% if step %}step="{{ step }}"{% endif %}
+               {% if pattern %}pattern="{{ pattern }}"{% endif %}
+               {% if oninput %}oninput="{{ oninput }}"{% endif %}
+               {% if onblur %}onblur="{{ onblur }}"{% endif %}
+               {% if onfocus %}onfocus="{{ onfocus }}"{% endif %}>
+        
+        {% if icon_right %}<span class="input-icon right">{{ icon_right }}</span>{% endif %}
+        
+        {% if clearable %}
+        <button type="button" class="clear-btn" onclick="this.previousElementSibling.value=''; this.previousElementSibling.focus();">
+            <span>×</span>
+        </button>
+        {% endif %}
+    </div>
+    
+    {% if error_message %}<div class="error-message">{{ error_message }}</div>{% endif %}
+    {% if success_message %}<div class="success-message">{{ success_message }}</div>{% endif %}
+</div>
+
+<style>
+.modern-input-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.modern-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+    position: relative;
+}
+
+.modern-label .required {
+    color: var(--error-color);
+    margin-left: 0.25rem;
+}
+
+.modern-label .help-text {
+    display: block;
+    font-weight: 400;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.modern-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    background: var(--surface-color);
+    transition: var(--transition);
+    font-size: 0.95rem;
+    color: var(--text-color);
+    font-weight: 400;
+    position: relative;
+}
+
+.modern-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    transform: translateY(-1px);
+}
+
+.modern-input:hover {
+    border-color: var(--primary-color);
+}
+
+.modern-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--background-color);
+}
+
+.modern-input.error {
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.modern-input.success {
+    border-color: var(--success-color);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+/* Input with icons */
+.modern-input.has-icon-left {
+    padding-left: 3rem;
+}
+
+.modern-input.has-icon-right {
+    padding-right: 3rem;
+}
+
+.input-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.input-icon.left {
+    left: 1rem;
+}
+
+.input-icon.right {
+    right: 1rem;
+}
+
+.modern-input:focus + .input-icon,
+.modern-input:focus ~ .input-icon {
+    color: var(--primary-color);
+}
+
+/* Clear button */
+.clear-btn {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.2rem;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition);
+    opacity: 0;
+    z-index: 3;
+}
+
+.modern-input:not(:placeholder-shown) + .clear-btn,
+.modern-input:not(:placeholder-shown) ~ .clear-btn {
+    opacity: 1;
+}
+
+.clear-btn:hover {
+    background: var(--border-color);
+    color: var(--text-color);
+}
+
+/* Floating label effect */
+.modern-input-group.floating .modern-label {
+    position: absolute;
+    top: 0.875rem;
+    left: 1rem;
+    transition: var(--transition);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.modern-input-group.floating .modern-input:focus + .modern-label,
+.modern-input-group.floating .modern-input:not(:placeholder-shown) + .modern-label {
+    top: -0.5rem;
+    left: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    background: var(--surface-color);
+    padding: 0 0.25rem;
+}
+
+/* Input sizes */
+.modern-input-group.small .modern-input {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+}
+
+.modern-input-group.large .modern-input {
+    padding: 1.125rem 1.25rem;
+    font-size: 1.1rem;
+}
+
+/* Input states */
+.modern-input-group.loading .modern-input {
+    padding-right: 3rem;
+}
+
+.modern-input-group.loading::after {
+    content: '';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-color);
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>

@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Image Coordinate Mapper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .canvas-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #e8ebff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .image-preview {
+            position: relative;
+            width: 100%;
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            cursor: crosshair;
+        }
+
+        .marker {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .marker:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            z-index: 10;
+        }
+
+        .marker.selected {
+            transform: translate(-50%, -50%) scale(1.2);
+            z-index: 10;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .regions-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .region-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .region-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .region-item.selected {
+            background: #e8ebff;
+            border: 2px solid #667eea;
+        }
+
+        .region-info {
+            flex: 1;
+        }
+
+        .region-label {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+
+        .region-coords {
+            font-size: 0.85rem;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+
+        .region-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            margin-right: 12px;
+        }
+
+        .region-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .actions-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .actions-bar .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .recent-images {
+            margin-top: 30px;
+        }
+
+        .recent-images h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .image-thumb {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s ease;
+        }
+
+        .image-thumb:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .image-thumb img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .image-thumb-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Interactive Image Coordinate Mapper</h1>
+            <p>Upload an image and click on objects to mark their coordinates for your iOS app</p>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="upload-section">
+                    <h3 style="margin-bottom: 15px;">Upload Image</h3>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📸</div>
+                        <p style="margin-bottom: 10px; font-weight: 600;">Click or drag image here</p>
+                        <p style="font-size: 0.9rem; color: #666;">JPG, PNG, WEBP up to 10MB</p>
+                    </div>
+                    <input type="file" id="imageInput" class="file-input" accept="image/*">
+                    <input type="text" id="imageName" class="form-control" placeholder="Image name (optional)" style="margin-top: 15px;">
+                </div>
+
+                <div id="alertContainer"></div>
+
+                <div class="form-group" id="regionForm" style="display: none;">
+                    <label>Region Label</label>
+                    <input type="text" id="regionLabel" class="form-control" placeholder="e.g., Watch, Suit, Boots">
+                    
+                    <label style="margin-top: 15px;">Region ID</label>
+                    <input type="text" id="regionId" class="form-control" placeholder="e.g., watch, suit, boots">
+                    
+                    <label style="margin-top: 15px;">Color</label>
+                    <input type="color" id="regionColor" class="form-control" value="#3B82F6" style="height: 50px;">
+                </div>
+
+                <div id="regionsList" style="display: none;">
+                    <h3 style="margin-bottom: 15px; margin-top: 20px;">Marked Regions</h3>
+                    <div class="regions-list" id="regionsListContainer"></div>
+                </div>
+
+                <div class="actions-bar" id="actionsBar" style="display: none;">
+                    <button class="btn btn-success" id="saveBtn">
+                        💾 Save Coordinates
+                    </button>
+                    <button class="btn btn-secondary" id="clearBtn">
+                        🗑️ Clear All
+                    </button>
+                </div>
+
+                <div class="recent-images" id="recentImages" style="display: none;">
+                    <h3>Recent Images</h3>
+                    <div id="recentImagesList"></div>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <div class="image-preview" id="imagePreview">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🖼️</div>
+                        <p>Upload an image to start marking coordinates</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentImageId = null;
+        let currentImageUrl = null;
+        let regions = [];
+        let selectedRegionIndex = null;
+        let imageElement = null;
+        let imageContainer = null;
+
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const imageName = document.getElementById('imageName');
+        const imagePreview = document.getElementById('imagePreview');
+        const regionForm = document.getElementById('regionForm');
+        const regionsList = document.getElementById('regionsList');
+        const regionsListContainer = document.getElementById('regionsListContainer');
+        const actionsBar = document.getElementById('actionsBar');
+        const saveBtn = document.getElementById('saveBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const regionLabel = document.getElementById('regionLabel');
+        const regionId = document.getElementById('regionId');
+        const regionColor = document.getElementById('regionColor');
+        const alertContainer = document.getElementById('alertContainer');
+        const recentImages = document.getElementById('recentImages');
+        const recentImagesList = document.getElementById('recentImagesList');
+
+        // Upload area click
+        uploadArea.addEventListener('click', () => imageInput.click());
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                imageInput.files = files;
+                handleImageUpload();
+            }
+        });
+
+        // File input change
+        imageInput.addEventListener('change', handleImageUpload);
+
+        // Image upload handler
+        async function handleImageUpload() {
+            const file = imageInput.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showAlert('Please select a valid image file', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('name', imageName.value.trim());
+
+            showAlert('Uploading image...', 'info');
+
+            try {
+                const response = await fetch('/image-editor/api/interactive/upload/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentImageId = data.imageId;
+                    currentImageUrl = data.imageUrl;
+                    loadImage(data.imageUrl);
+                    showAlert('Image uploaded successfully!', 'success');
+                    loadRecentImages();
+                    
+                    // Try to load existing regions
+                    loadImageRegions(currentImageId);
+                } else {
+                    showAlert(data.error || 'Upload failed', 'error');
+                }
+            } catch (error) {
+                showAlert('Error uploading image: ' + error.message, 'error');
+            }
+        }
+
+        // Load image
+        function loadImage(url) {
+            imagePreview.innerHTML = `<img src="${url}" id="mainImage" alt="Interactive Image">`;
+            imageElement = document.getElementById('mainImage');
+            imageContainer = imagePreview;
+
+            imageElement.addEventListener('load', () => {
+                imageElement.style.cursor = 'crosshair';
+                imageElement.addEventListener('click', handleImageClick);
+            });
+
+            regionForm.style.display = 'block';
+            actionsBar.style.display = 'flex';
+        }
+
+        // Handle image click
+        function handleImageClick(e) {
+            if (!imageElement) return;
+
+            const rect = imageElement.getBoundingClientRect();
+            const containerRect = imageContainer.getBoundingClientRect();
+            
+            // Calculate click position relative to the displayed image
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            
+            // Calculate percentages based on displayed image size
+            const xPercent = clickX / rect.width;
+            const yPercent = clickY / rect.height;
+
+            // Validate coordinates
+            if (xPercent < 0 || xPercent > 1 || yPercent < 0 || yPercent > 1) {
+                return;
+            }
+
+            // Get region details from form
+            const label = regionLabel.value.trim() || `Region ${regions.length + 1}`;
+            const regionIdValue = regionId.value.trim() || `region_${regions.length + 1}`;
+            const color = regionColor.value;
+
+            // Create region
+            const region = {
+                id: regionIdValue,
+                label: label,
+                xPercent: xPercent,
+                yPercent: yPercent,
+                color: color,
+                order: regions.length
+            };
+
+            regions.push(region);
+            addMarker(region, regions.length - 1);
+            updateRegionsList();
+            
+            // Clear form
+            regionLabel.value = '';
+            regionId.value = '';
+        }
+
+        // Add marker to image
+        function addMarker(region, index) {
+            if (!imageElement) return;
+
+            const rect = imageElement.getBoundingClientRect();
+            const x = rect.left + (region.xPercent * rect.width) - imageContainer.getBoundingClientRect().left;
+            const y = rect.top + (region.yPercent * rect.height) - imageContainer.getBoundingClientRect().top;
+
+            const marker = document.createElement('div');
+            marker.className = 'marker';
+            marker.style.left = `${x}px`;
+            marker.style.top = `${y}px`;
+            marker.style.borderColor = region.color;
+            marker.style.color = region.color;
+            marker.textContent = index + 1;
+            marker.dataset.index = index;
+
+            marker.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectRegion(index);
+            });
+
+            imageContainer.appendChild(marker);
+        }
+
+        // Select region
+        function selectRegion(index) {
+            selectedRegionIndex = index;
+            
+            // Update marker styles
+            document.querySelectorAll('.marker').forEach((marker, i) => {
+                marker.classList.toggle('selected', i === index);
+            });
+
+            // Update regions list
+            updateRegionsList();
+
+            // Populate form
+            const region = regions[index];
+            regionLabel.value = region.label;
+            regionId.value = region.id;
+            regionColor.value = region.color;
+        }
+
+        // Update regions list
+        function updateRegionsList() {
+            if (regions.length === 0) {
+                regionsList.style.display = 'none';
+                return;
+            }
+
+            regionsList.style.display = 'block';
+            regionsListContainer.innerHTML = '';
+
+            regions.forEach((region, index) => {
+                const item = document.createElement('div');
+                item.className = `region-item ${index === selectedRegionIndex ? 'selected' : ''}`;
+                item.innerHTML = `
+                    <div class="region-color" style="background-color: ${region.color}"></div>
+                    <div class="region-info">
+                        <div class="region-label">${region.label}</div>
+                        <div class="region-coords">X: ${region.xPercent.toFixed(4)}, Y: ${region.yPercent.toFixed(4)}</div>
+                    </div>
+                    <div class="region-actions">
+                        <button class="btn btn-small btn-secondary" onclick="editRegion(${index})">✏️</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteRegion(${index})">🗑️</button>
+                    </div>
+                `;
+                item.addEventListener('click', () => selectRegion(index));
+                regionsListContainer.appendChild(item);
+            });
+        }
+
+        // Edit region
+        window.editRegion = function(index) {
+            selectRegion(index);
+            regionLabel.focus();
+        };
+
+        // Delete region
+        window.deleteRegion = function(index) {
+            if (confirm('Delete this region?')) {
+                regions.splice(index, 1);
+                redrawMarkers();
+                updateRegionsList();
+                selectedRegionIndex = null;
+            }
+        };
+
+        // Redraw all markers
+        function redrawMarkers() {
+            document.querySelectorAll('.marker').forEach(marker => marker.remove());
+            regions.forEach((region, index) => addMarker(region, index));
+        }
+
+        // Save coordinates
+        saveBtn.addEventListener('click', async () => {
+            if (!currentImageId || regions.length === 0) {
+                showAlert('Please mark at least one region', 'error');
+                return;
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="loading"></span> Saving...';
+
+            try {
+                const response = await fetch(`/image-editor/api/interactive/${currentImageId}/regions/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ regions: regions })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert(`Successfully saved ${data.count} region(s)!`, 'success');
+                } else {
+                    showAlert(data.error || 'Failed to save', 'error');
+                }
+            } catch (error) {
+                showAlert('Error saving: ' + error.message, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '💾 Save Coordinates';
+            }
+        });
+
+        // Clear all
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Clear all regions?')) {
+                regions = [];
+                selectedRegionIndex = null;
+                redrawMarkers();
+                updateRegionsList();
+                regionLabel.value = '';
+                regionId.value = '';
+            }
+        });
+
+        // Load image regions
+        async function loadImageRegions(imageId) {
+            try {
+                const response = await fetch(`/image-editor/api/interactive/${imageId}/`);
+                const data = await response.json();
+
+                if (data.regions && data.regions.length > 0) {
+                    regions = data.regions.map(r => ({
+                        id: r.id,
+                        label: r.label,
+                        xPercent: r.xPercent,
+                        yPercent: r.yPercent,
+                        color: r.color || '#3B82F6',
+                        order: r.order || 0
+                    }));
+
+                    // Wait for image to load, then draw markers
+                    if (imageElement) {
+                        imageElement.addEventListener('load', () => {
+                            redrawMarkers();
+                            updateRegionsList();
+                        }, { once: true });
+                    } else {
+                        setTimeout(() => {
+                            redrawMarkers();
+                            updateRegionsList();
+                        }, 500);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading regions:', error);
+            }
+        }
+
+        // Load recent images
+        async function loadRecentImages() {
+            try {
+                const response = await fetch('/image-editor/api/interactive/');
+                const data = await response.json();
+
+                if (data.images && data.images.length > 0) {
+                    recentImages.style.display = 'block';
+                    recentImagesList.innerHTML = '';
+
+                    data.images.slice(0, 5).forEach(img => {
+                        const thumb = document.createElement('a');
+                        thumb.className = 'image-thumb';
+                        thumb.href = '#';
+                        thumb.innerHTML = `
+                            <img src="${img.imageUrl}" alt="${img.name}">
+                            <div class="image-thumb-name">${img.name}</div>
+                            <div style="font-size: 0.8rem; color: #666;">${img.regionCount} regions</div>
+                        `;
+                        thumb.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            loadExistingImage(img.id);
+                        });
+                        recentImagesList.appendChild(thumb);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading recent images:', error);
+            }
+        }
+
+        // Load existing image
+        async function loadExistingImage(imageId) {
+            try {
+                const response = await fetch(`/image-editor/api/interactive/${imageId}/`);
+                const data = await response.json();
+
+                currentImageId = data.id;
+                currentImageUrl = data.imageUrl;
+                loadImage(data.imageUrl);
+                showAlert('Image loaded!', 'success');
+
+                if (data.regions && data.regions.length > 0) {
+                    regions = data.regions.map(r => ({
+                        id: r.id,
+                        label: r.label,
+                        xPercent: r.xPercent,
+                        yPercent: r.yPercent,
+                        color: r.color || '#3B82F6',
+                        order: r.order || 0
+                    }));
+
+                    setTimeout(() => {
+                        redrawMarkers();
+                        updateRegionsList();
+                    }, 500);
+                } else {
+                    regions = [];
+                    updateRegionsList();
+                }
+            } catch (error) {
+                showAlert('Error loading image: ' + error.message, 'error');
+            }
+        }
+
+        // Show alert
+        function showAlert(message, type = 'info') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type === 'error' ? 'error' : type === 'success' ? 'success' : 'info'}`;
+            alert.textContent = message;
+            
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => alert.remove(), 5000);
+            }
+        }
+
+        // Get CSRF token
+        function getCsrfToken() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'csrftoken') {
+                    return value;
+                }
+            }
+            return '';
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (regions.length > 0) {
+                setTimeout(redrawMarkers, 100);
+            }
+        });
+
+        // Initialize
+        loadRecentImages();
+    </script>
+</body>
+</html>
+

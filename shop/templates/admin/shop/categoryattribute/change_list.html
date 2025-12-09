@@ -1,0 +1,67 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="#" onclick="showManageValuesInfo()" class="btn btn-high btn-info" 
+           style="background: #17a2b8; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; margin-left: 10px;">
+            ℹ️ راهنمای مدیریت مقادیر
+        </a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+    
+    <!-- Info Modal -->
+    <div id="manageValuesModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div style="background-color: white; margin: 15% auto; padding: 20px; border-radius: 10px; width: 80%; max-width: 600px; text-align: center;">
+            <h2 style="color: #495057; margin-bottom: 20px;">🔧 راهنمای مدیریت مقادیر ویژگی</h2>
+            
+            <div style="text-align: right; margin-bottom: 20px;">
+                <h3 style="color: #007bff;">نحوه استفاده:</h3>
+                <ol style="color: #6c757d; line-height: 1.8;">
+                    <li>ویژگی مورد نظر را از لیست انتخاب کنید</li>
+                    <li>روی دکمه "🔧 مدیریت مقادیر" کلیک کنید</li>
+                    <li>در صفحه جدید، مقادیر را با کشیدن و رها کردن مرتب کنید</li>
+                    <li>مقادیر جدید اضافه کنید یا مقادیر موجود را حذف کنید</li>
+                </ol>
+            </div>
+            
+            <div style="text-align: right; margin-bottom: 20px;">
+                <h3 style="color: #28a745;">ویژگی‌های جدید:</h3>
+                <ul style="color: #6c757d; line-height: 1.8;">
+                    <li>رابط کاربری زیبا و مدرن</li>
+                    <li>مرتب‌سازی با کشیدن و رها کردن</li>
+                    <li>افزودن و حذف مقادیر</li>
+                    <li>ذخیره خودکار تغییرات</li>
+                    <li>طراحی واکنش‌گرا برای موبایل</li>
+                </ul>
+            </div>
+            
+            <button onclick="closeManageValuesInfo()" 
+                    style="background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+                بستن
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function showManageValuesInfo() {
+            document.getElementById('manageValuesModal').style.display = 'block';
+        }
+        
+        function closeManageValuesInfo() {
+            document.getElementById('manageValuesModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('manageValuesModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+{% endblock %}

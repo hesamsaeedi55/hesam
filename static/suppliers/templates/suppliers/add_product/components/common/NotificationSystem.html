@@ -1,0 +1,403 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Modern Notification/Toast Component -->
+<div class="notification-container" id="notificationContainer"></div>
+
+<!-- Notification Template -->
+<div class="notification {{ notification_class|default:'info' }}" id="notificationTemplate" style="display: none;">
+    <div class="notification-content">
+        <div class="notification-icon">
+            <span class="icon">ℹ️</span>
+        </div>
+        <div class="notification-body">
+            <h4 class="notification-title">{{ title|default:'Notification' }}</h4>
+            <p class="notification-message">{{ message|default:'This is a notification message.' }}</p>
+        </div>
+        <button class="notification-close" onclick="this.closest('.notification').remove()">
+            <span>×</span>
+        </button>
+    </div>
+    <div class="notification-progress"></div>
+</div>
+
+<style>
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 400px;
+}
+
+body[dir="rtl"] .notification-container {
+    right: auto;
+    left: 20px;
+}
+
+.notification {
+    background: var(--card-bg);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    position: relative;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 100%;
+}
+
+body[dir="rtl"] .notification {
+    transform: translateX(-100%);
+}
+
+.notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+}
+
+.notification-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1rem;
+}
+
+.notification-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-title {
+    color: var(--text-color);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+}
+
+.notification-message {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.notification-close {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.2rem;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.notification-close:hover {
+    background: var(--border-color);
+    color: var(--text-color);
+}
+
+.notification-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--primary-color);
+    transform-origin: left;
+    animation: progress 5s linear forwards;
+}
+
+/* Notification Types */
+.notification.success {
+    border-left: 4px solid var(--success-color);
+}
+
+.notification.success .notification-icon {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.notification.success .notification-icon .icon {
+    content: '✓';
+}
+
+.notification.success .notification-progress {
+    background: var(--success-color);
+}
+
+.notification.error {
+    border-left: 4px solid var(--error-color);
+}
+
+.notification.error .notification-icon {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error-color);
+}
+
+.notification.error .notification-icon .icon {
+    content: '✕';
+}
+
+.notification.error .notification-progress {
+    background: var(--error-color);
+}
+
+.notification.warning {
+    border-left: 4px solid var(--warning-color);
+}
+
+.notification.warning .notification-icon {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.notification.warning .notification-icon .icon {
+    content: '⚠';
+}
+
+.notification.warning .notification-progress {
+    background: var(--warning-color);
+}
+
+.notification.info {
+    border-left: 4px solid var(--primary-color);
+}
+
+.notification.info .notification-icon {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-color);
+}
+
+.notification.info .notification-icon .icon {
+    content: 'ℹ';
+}
+
+.notification.info .notification-progress {
+    background: var(--primary-color);
+}
+
+/* Progress Animation */
+@keyframes progress {
+    0% { transform: scaleX(1); }
+    100% { transform: scaleX(0); }
+}
+
+/* Notification Actions */
+.notification.with-actions .notification-body {
+    margin-bottom: 0.75rem;
+}
+
+.notification-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.notification-action {
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    color: var(--text-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.notification-action:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.notification-action.primary {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.notification-action.primary:hover {
+    background: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .notification-container {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
+    
+    .notification {
+        transform: translateY(-100%);
+    }
+    
+    body[dir="rtl"] .notification {
+        transform: translateY(-100%);
+    }
+    
+    .notification.show {
+        transform: translateY(0);
+    }
+}
+</style>
+
+<script>
+// Notification System
+class NotificationSystem {
+    constructor() {
+        this.container = document.getElementById('notificationContainer');
+        this.notifications = [];
+    }
+    
+    show(options = {}) {
+        const {
+            title = 'Notification',
+            message = '',
+            type = 'info',
+            duration = 5000,
+            actions = null,
+            persistent = false
+        } = options;
+        
+        const notification = this.createNotification({
+            title,
+            message,
+            type,
+            actions,
+            persistent
+        });
+        
+        this.container.appendChild(notification);
+        this.notifications.push(notification);
+        
+        // Trigger animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Auto remove
+        if (!persistent && duration > 0) {
+            setTimeout(() => {
+                this.remove(notification);
+            }, duration);
+        }
+        
+        return notification;
+    }
+    
+    createNotification({ title, message, type, actions, persistent }) {
+        const template = document.getElementById('notificationTemplate');
+        const notification = template.cloneNode(true);
+        
+        notification.id = `notification-${Date.now()}`;
+        notification.className = `notification ${type}`;
+        notification.style.display = 'block';
+        
+        // Update content
+        notification.querySelector('.notification-title').textContent = title;
+        notification.querySelector('.notification-message').textContent = message;
+        
+        // Set icon
+        const iconMap = {
+            success: '✓',
+            error: '✕',
+            warning: '⚠',
+            info: 'ℹ'
+        };
+        notification.querySelector('.notification-icon .icon').textContent = iconMap[type] || 'ℹ';
+        
+        // Add actions if provided
+        if (actions && actions.length > 0) {
+            notification.classList.add('with-actions');
+            const actionsContainer = document.createElement('div');
+            actionsContainer.className = 'notification-actions';
+            
+            actions.forEach(action => {
+                const button = document.createElement('button');
+                button.className = `notification-action ${action.type || ''}`;
+                button.textContent = action.text;
+                button.onclick = action.onclick;
+                actionsContainer.appendChild(button);
+            });
+            
+            notification.querySelector('.notification-body').appendChild(actionsContainer);
+        }
+        
+        // Remove progress bar if persistent
+        if (persistent) {
+            notification.querySelector('.notification-progress').style.display = 'none';
+        }
+        
+        return notification;
+    }
+    
+    remove(notification) {
+        if (notification && notification.parentNode) {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+                const index = this.notifications.indexOf(notification);
+                if (index > -1) {
+                    this.notifications.splice(index, 1);
+                }
+            }, 300);
+        }
+    }
+    
+    clear() {
+        this.notifications.forEach(notification => {
+            this.remove(notification);
+        });
+    }
+}
+
+// Global notification system
+window.notifications = new NotificationSystem();
+
+// Convenience functions
+window.showNotification = (title, message, type = 'info', duration = 5000) => {
+    return window.notifications.show({ title, message, type, duration });
+};
+
+window.showSuccess = (title, message, duration = 5000) => {
+    return window.notifications.show({ title, message, type: 'success', duration });
+};
+
+window.showError = (title, message, duration = 7000) => {
+    return window.notifications.show({ title, message, type: 'error', duration });
+};
+
+window.showWarning = (title, message, duration = 6000) => {
+    return window.notifications.show({ title, message, type: 'warning', duration });
+};
+
+window.showInfo = (title, message, duration = 5000) => {
+    return window.notifications.show({ title, message, type: 'info', duration });
+};
+</script>

@@ -1,0 +1,29 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Category and Tags Form Component -->
+<div class="form-section">
+    <h2 class="section-title">دسته‌بندی و برچسب‌ها</h2>
+    <div class="section-content">
+        <!-- Category Section -->
+        <div class="form-group category-section">
+            <label for="id_category">{{ form.category.label }}</label>
+            {{ form.category }}
+            {% if form.category.errors %}
+            <div class="error-message">{{ form.category.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Tags Section -->
+        <div class="form-group tag-section">
+            <label for="id_tags">برچسب‌ها</label>
+            <select name="tags" id="id_tags" multiple class="form-control multi-select-tags" data-placeholder="انتخاب برچسب‌ها">
+                <!-- Options will be populated dynamically by JavaScript -->
+            </select>
+            {% if form.tags.errors %}
+            <div class="error-message">{{ form.tags.errors }}</div>
+            {% endif %}
+            <small class="form-text text-muted">برچسب‌ها بر اساس دسته‌بندی انتخاب شده نمایش داده می‌شوند</small>
+        </div>
+    </div>
+</div>

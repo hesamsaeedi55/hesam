@@ -1,0 +1,461 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+.variants-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.variants-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.variants-table th,
+.variants-table td {
+    border: 1px solid #dee2e6;
+    padding: 8px;
+    text-align: left;
+}
+
+.variants-table th {
+    background-color: #e9ecef;
+    font-weight: bold;
+}
+
+.variant-row {
+    background-color: white;
+}
+
+.variant-row:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.color-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.color-red { background-color: #dc3545; }
+.color-blue { background-color: #007bff; }
+.color-green { background-color: #28a745; }
+.color-yellow { background-color: #ffc107; color: #000; }
+.color-black { background-color: #343a40; }
+.color-white { background-color: #6c757d; }
+.color-pink { background-color: #e83e8c; }
+.color-orange { background-color: #fd7e14; }
+.color-purple { background-color: #6f42c1; }
+.color-brown { background-color: #795548; }
+</style>
+{% endblock %}
+
+{% block after_field_sets %}
+{{ block.super }}
+
+{% if product_variants %}
+<div class="variants-section">
+    <h3>🔧 Product Variants ({{ variants_count }})</h3>
+    <p>Manage product variants with different colors, sizes, and attributes.</p>
+    
+    <table class="variants-table">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Color</th>
+                <th>Size</th>
+                <th>Price (Toman)</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for variant in product_variants %}
+            <tr class="variant-row">
+                <td><strong>{{ variant.sku }}</strong></td>
+                <td>
+                    {% if variant.attributes.color %}
+                        <span class="color-badge color-{{ variant.attributes.color|lower|slice:':5' }}">
+                            {{ variant.attributes.color }}
+                        </span>
+                    {% else %}
+                        <span class="color-badge color-white">نامشخص</span>
+                    {% endif %}
+                </td>
+                <td>{{ variant.attributes.size|default:"نامشخص" }}</td>
+                <td>{{ variant.price_toman|floatformat:0|add:" تومان" }}</td>
+                <td>
+                    {% if variant.stock_quantity > 0 %}
+                        <span style="color: #28a745; font-weight: bold;">{{ variant.stock_quantity }}</span>
+                    {% else %}
+                        <span style="color: #dc3545; font-weight: bold;">ناموجود</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if variant.is_active %}
+                        <span style="color: #28a745;">✓ فعال</span>
+                    {% else %}
+                        <span style="color: #dc3545;">✗ غیرفعال</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button type="button" onmousedown="editVariant({{ variant.id }})" class="btn btn-sm btn-primary" style="background: #007bff; color: white; padding: 4px 8px; border: none; border-radius: 3px; font-size: 11px; cursor: pointer;">ویرایش</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 15px;">
+        <a href="{% url 'admin:shop_productvariant_add' %}?product={{ object_id }}" 
+           class="button" 
+           style="background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">
+            ➕ افزودن نوع جدید
+        </a>
+        
+        <a href="{% url 'admin:shop_productvariant_changelist' %}?product__id__exact={{ object_id }}" 
+           class="button" 
+           style="background: #17a2b8; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; margin-left: 10px;">
+            🔧 مدیریت انواع
+        </a>
+    </div>
+</div>
+{% else %}
+<div class="variants-section">
+    <h3>🔧 Product Variants</h3>
+    <p>این محصول هنوز هیچ نوعی ندارد.</p>
+    
+    <div style="margin-top: 15px;">
+        <a href="{% url 'admin:shop_productvariant_add' %}?product={{ object_id }}" 
+           class="button" 
+           style="background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">
+            ➕ افزودن نوع جدید
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Variant Modal Overlay -->
+<div class="variant-modal" id="variantModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 10000; overflow-y: auto;">
+    <div style="position: relative; background: white; margin: 5% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+            <h3 id="variantModalTitle" style="margin: 0; color: #333; font-size: 1.5rem; font-weight: bold;">افزودن نوع محصول جدید</h3>
+            <button type="button" onclick="document.getElementById('variantModal').style.display='none';" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
+        </div>
+        
+        <form id="variantForm" style="display: flex; flex-direction: column; gap: 15px;">
+            <input type="hidden" id="variantIndex" value="">
+            
+            <div>
+                <label for="variantSku" style="display: block; margin-bottom: 5px; font-weight: bold;">SKU:</label>
+                <input type="text" id="variantSku" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="مثال: TSHIRT-RED-M">
+            </div>
+            
+            <div>
+                <label for="variantPriceToman" style="display: block; margin-bottom: 5px; font-weight: bold;">قیمت (تومان):</label>
+                <input type="number" id="variantPriceToman" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="50000">
+            </div>
+            
+            <div>
+                <label for="variantStock" style="display: block; margin-bottom: 5px; font-weight: bold;">موجودی:</label>
+                <input type="number" id="variantStock" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="100">
+            </div>
+            
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="checkbox" id="variantIsActive" style="margin: 0;">
+                    <span>فعال</span>
+                </label>
+                
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="checkbox" id="variantIsDefault" style="margin: 0;">
+                    <span>پیش‌فرض</span>
+                </label>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+                <button type="button" onclick="document.getElementById('variantModal').style.display='none';" style="background: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">انصراف</button>
+                <button type="button" onclick="saveVariant();" style="background: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">ذخیره</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extrajs %}
+{{ block.super }}
+<script>
+console.log('🔧 Admin product edit page loaded');
+
+// Global variables for variant management
+window.existingVariants = [];
+window.isEditingVariant = false;
+window.editingVariantId = null;
+
+// Function to edit an existing variant
+function editVariant(variantId) {
+    console.log('🔧 editVariant called with variantId:', variantId);
+    console.log('🔍 DEBUG: window.existingVariants:', window.existingVariants);
+    console.log('🔍 DEBUG: Looking for variant with ID:', variantId);
+    
+    // Prevent any form submission
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    // Find variant by ID instead of array index
+    const variant = window.existingVariants.find(v => v.id == variantId);
+    console.log('🔍 DEBUG: Found variant:', variant);
+    
+    if (!variant) {
+        console.error('❌ Available variants:', window.existingVariants.map(v => ({ id: v.id, sku: v.sku })));
+        console.log('🔍 DEBUG: window.existingVariants is empty, trying to load from table instead...');
+        
+        // Try to find the variant in the table and use editVariantFromTable logic
+        const tableRows = document.querySelectorAll('#variantsTableBody tr, .variants-table tbody tr');
+        console.log('🔍 DEBUG: Found table rows:', tableRows.length);
+        
+        for (let row of tableRows) {
+            const editButton = row.querySelector('button[onmousedown*="editVariant"]');
+            if (editButton && editButton.getAttribute('onmousedown').includes(variantId)) {
+                console.log('🔍 DEBUG: Found matching table row, calling editVariantFromTable...');
+                // Create a fake button element to pass to editVariantFromTable
+                const fakeButton = { closest: () => row };
+                editVariantFromTable(fakeButton);
+                return;
+            }
+        }
+        
+        alert('نوع محصول مورد نظر یافت نشد');
+        return;
+    }
+    
+    const variantIndex = window.existingVariants.findIndex(v => v.id == variantId);
+    console.log('🔧 Editing variant:', variant);
+    console.log('🔧 Variant array index:', variantIndex);
+    
+    // Open the variant modal
+    const modal = document.getElementById('variantModal');
+    const title = document.getElementById('variantModalTitle');
+    const form = document.getElementById('variantForm');
+    const variantIndexInput = document.getElementById('variantIndex');
+    
+    if (!modal || !form) {
+        console.error('❌ Variant modal or form not found');
+        alert('فرم ویرایش نوع محصول یافت نشد');
+        return;
+    }
+    
+    // Update modal title
+    if (title) {
+        title.textContent = 'ویرایش نوع محصول';
+    }
+    
+    // Set the variant index for saving
+    if (variantIndexInput) {
+        variantIndexInput.value = variantIndex;
+        console.log('🔧 DEBUG: Set variantIndex input value to:', variantIndex);
+        console.log('🔧 DEBUG: variantIndexInput.value is now:', variantIndexInput.value);
+    } else {
+        console.error('❌ variantIndexInput not found!');
+    }
+    
+    // Set global editing flag
+    window.isEditingVariant = true;
+    window.editingVariantId = variantId;
+    console.log('🔧 DEBUG: Set global editing flags - isEditingVariant:', window.isEditingVariant, 'editingVariantId:', window.editingVariantId);
+    
+    // Populate form fields with existing variant data
+    const skuInput = document.getElementById('variantSku');
+    const priceInput = document.getElementById('variantPriceToman');
+    const stockInput = document.getElementById('variantStock');
+    const activeCheckbox = document.getElementById('variantIsActive');
+    const defaultCheckbox = document.getElementById('variantIsDefault');
+    
+    if (skuInput) skuInput.value = variant.sku || '';
+    if (priceInput) priceInput.value = variant.price_toman || '';
+    if (stockInput) stockInput.value = variant.stock_quantity || '';
+    if (activeCheckbox) activeCheckbox.checked = variant.is_active || false;
+    if (defaultCheckbox) defaultCheckbox.checked = variant.is_default || false;
+    
+    console.log('🔧 DEBUG: Populated form fields with variant data');
+    
+    // Show the modal
+    modal.style.display = 'block';
+    console.log('🔧 DEBUG: Modal displayed');
+}
+
+// Function to edit variant from table row
+function editVariantFromTable(button) {
+    console.log('🔧 editVariantFromTable called');
+    
+    // Prevent any form submission
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    const row = button.closest('tr');
+    if (!row) {
+        console.error('❌ Could not find table row');
+        return;
+    }
+    
+    console.log('🔍 DEBUG: Found table row:', row);
+    
+    // Extract variant data from table row
+    const sku = row.cells[0]?.textContent?.trim();
+    const priceText = row.cells[3]?.textContent?.replace(/[^\d]/g, '');
+    const stockText = row.cells[4]?.textContent?.replace(/[^\d]/g, '');
+    const isActive = row.cells[5]?.textContent?.includes('فعال');
+    
+    console.log('🔍 DEBUG: Extracted data from row:', { sku, priceText, stockText, isActive });
+    
+    // Open the variant modal
+    const modal = document.getElementById('variantModal');
+    const title = document.getElementById('variantModalTitle');
+    const form = document.getElementById('variantForm');
+    
+    if (!modal || !form) {
+        console.error('❌ Variant modal or form not found');
+        alert('فرم ویرایش نوع محصول یافت نشد');
+        return;
+    }
+    
+    // Update modal title
+    if (title) {
+        title.textContent = 'ویرایش نوع محصول';
+    }
+    
+    // Set global editing flag
+    window.isEditingVariant = true;
+    console.log('🔧 DEBUG: Set global editing flag - isEditingVariant:', window.isEditingVariant);
+    
+    // Populate form fields with extracted data
+    const skuInput = document.getElementById('variantSku');
+    const priceInput = document.getElementById('variantPriceToman');
+    const stockInput = document.getElementById('variantStock');
+    const activeCheckbox = document.getElementById('variantIsActive');
+    const defaultCheckbox = document.getElementById('variantIsDefault');
+    
+    if (skuInput) skuInput.value = sku || '';
+    if (priceInput) priceInput.value = priceText || '';
+    if (stockInput) stockInput.value = stockText || '';
+    if (activeCheckbox) activeCheckbox.checked = isActive || false;
+    if (defaultCheckbox) defaultCheckbox.checked = false;
+    
+    console.log('🔧 DEBUG: Populated form fields with extracted data');
+    
+    // Show the modal
+    modal.style.display = 'block';
+    console.log('🔧 DEBUG: Modal displayed');
+}
+
+// Function to save variant
+function saveVariant() {
+    console.log('🎯 saveVariant() called');
+    
+    // Check if we're editing an existing variant
+    const variantIndex = document.getElementById('variantIndex')?.value;
+    const modalTitle = document.getElementById('variantModalTitle')?.textContent;
+    const isEditingByTitle = modalTitle && modalTitle.includes('ویرایش');
+    const isEditing = (variantIndex && variantIndex !== '' && variantIndex !== 'undefined' && !isNaN(parseInt(variantIndex))) || window.isEditingVariant || isEditingByTitle;
+    
+    console.log('🔍 DEBUG: variantIndex value:', variantIndex);
+    console.log('🔍 DEBUG: isEditing:', isEditing);
+    console.log('🔍 DEBUG: variantIndex type:', typeof variantIndex);
+    
+    let sku = document.getElementById('variantSku')?.value?.trim();
+    const price = document.getElementById('variantPriceToman')?.value?.replace(/,/g, '') || '0';
+    const stock = parseInt(document.getElementById('variantStock')?.value) || 0;
+    const isActive = document.getElementById('variantIsActive')?.checked || false;
+    const isDefault = document.getElementById('variantIsDefault')?.checked || false;
+    
+    console.log('🔍 Variant data:', { sku, price, stock, isActive, isDefault, isEditing, variantIndex });
+    
+    if (!sku) {
+        alert('لطفاً SKU را وارد کنید');
+        return;
+    }
+    
+    if (isEditing) {
+        console.log('🔧 Updating existing variant...');
+        // Update existing variant logic would go here
+        alert('ویرایش نوع محصول در حال توسعه است. لطفاً از صفحه ویرایش جداگانه استفاده کنید.');
+    } else {
+        console.log('🔧 Adding new variant...');
+        // Add new variant logic would go here
+        alert('افزودن نوع جدید در حال توسعه است. لطفاً از دکمه "افزودن نوع جدید" استفاده کنید.');
+    }
+    
+    // Close modal
+    document.getElementById('variantModal').style.display = 'none';
+}
+
+// Function to load existing variants from the table
+function loadExistingVariants() {
+    console.log('🔍 Loading existing variants from table...');
+    
+    const tableRows = document.querySelectorAll('.variants-table tbody tr');
+    window.existingVariants = [];
+    
+    tableRows.forEach((row, index) => {
+        const sku = row.cells[0]?.textContent?.trim();
+        const priceText = row.cells[3]?.textContent?.replace(/[^\d]/g, '');
+        const stockText = row.cells[4]?.textContent?.replace(/[^\d]/g, '');
+        const isActive = row.cells[5]?.textContent?.includes('فعال');
+        
+        // Try to extract variant ID from the edit button
+        const editButton = row.querySelector('button[onmousedown*="editVariant"]');
+        let variantId = null;
+        if (editButton) {
+            const onmousedown = editButton.getAttribute('onmousedown');
+            const match = onmousedown.match(/editVariant\((\d+)\)/);
+            if (match) {
+                variantId = parseInt(match[1]);
+            }
+        }
+        
+        if (sku && variantId) {
+            window.existingVariants.push({
+                id: variantId,
+                sku: sku,
+                price_toman: priceText,
+                stock_quantity: stockText,
+                is_active: isActive,
+                is_default: false // Default to false for now
+            });
+        }
+    });
+    
+    console.log('🔍 Loaded variants:', window.existingVariants);
+}
+
+// Load variants when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 DOM loaded, loading existing variants...');
+    loadExistingVariants();
+});
+
+// Make functions globally accessible
+window.editVariant = editVariant;
+window.editVariantFromTable = editVariantFromTable;
+window.saveVariant = saveVariant;
+window.loadExistingVariants = loadExistingVariants;
+
+console.log('🔧 Admin variant functions loaded');
+</script>
+{% endblock %}

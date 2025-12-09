@@ -1,0 +1,22 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Inventory Form Component -->
+<div class="form-section">
+    <h2 class="section-title">موجودی و وضعیت</h2>
+    <div class="section-content">
+        <div class="form-group">
+            <label for="stock">تعداد موجودی</label>
+            <input type="number" id="stock" name="stock_quantity" required {% if product %}value="{{ product.stock_quantity }}"{% endif %}>
+        </div>
+
+        <div class="form-group">
+            <label for="is_active">وضعیت محصول</label>
+            <div class="switch">
+                <input type="checkbox" id="is_active" name="is_active" {% if not product or product.is_active %}checked{% endif %}>
+                <span class="slider round"></span>
+            </div>
+            <span class="status-text" id="statusText">فعال</span>
+        </div>
+    </div>
+</div>

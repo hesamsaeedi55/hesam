@@ -1,0 +1,136 @@
+{% load static %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Add Product" %}</title>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{% static 'suppliers/templates/suppliers/add_product/styles/main.css' %}">
+    <link rel="stylesheet" href="{% static 'suppliers/templates/suppliers/add_product/styles/ProductInfoForm.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="form-card">
+            <div class="form-header">
+                <h1>افزودن محصول جدید</h1>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Simple Image Upload -->
+                <div class="image-section">
+                    <label>تصاویر محصول</label>
+                    <div style="width: 100%; text-align: center; padding: 2rem;">
+                        <input type="file" id="imageInput" name="images" multiple accept="image/*" style="display: none;">
+                        <div class="upload-area" style="border: 3px dashed #4a5568; border-radius: 8px; padding: 4rem 6rem; background: #2d3748; cursor: pointer; width: 1000px; margin: 0 auto; position: relative;" 
+                             onclick="document.getElementById('imageInput').click()">
+                            <p style="font-size: 1.3rem; margin-bottom: 2rem; color: #e2e8f0;">برای انتخاب تصاویر کلیک کنید</p>
+                            <button type="button" style="background: #3182ce; color: white; border: none; padding: 1rem 2.5rem; border-radius: 4px; cursor: pointer; font-size: 1.1rem;" onclick="event.stopPropagation(); document.getElementById('imageInput').click()">انتخاب فایل</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Image Preview Area -->
+                    <div class="image-preview" id="imagePreviews"></div>
+                </div>
+                
+                <div class="submit-row">
+                    <button type="submit" class="btn btn-primary">ذخیره محصول</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // SIMPLE image upload - guaranteed to work
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Page loaded');
+            
+            const imageInput = document.getElementById('imageInput');
+            if (imageInput) {
+                imageInput.addEventListener('change', function(e) {
+                    console.log('📷 Files selected:', e.target.files.length);
+                    
+                    const files = Array.from(e.target.files);
+                    const container = document.getElementById('imagePreviews');
+                    
+                    files.forEach((file, index) => {
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                const previewDiv = document.createElement('div');
+                                previewDiv.style.cssText = `
+                                    display: inline-block;
+                                    margin: 5px;
+                                    position: relative;
+                                    border-radius: 8px;
+                                    overflow: hidden;
+                                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                                `;
+                                
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.style.cssText = `
+                                    display: block;
+                                    width: 150px;
+                                    height: 150px;
+                                    object-fit: cover;
+                                `;
+                                
+                                // Order label
+                                const label = document.createElement('div');
+                                label.style.cssText = `
+                                    position: absolute;
+                                    top: 5px;
+                                    left: 5px;
+                                    background: rgba(0,0,0,0.9);
+                                    color: white;
+                                    padding: 2px 6px;
+                                    border-radius: 3px;
+                                    font-size: 12px;
+                                    font-weight: bold;
+                                    z-index: 10;
+                                `;
+                                label.textContent = `${index + 1}/${files.length}`;
+                                
+                                // Delete button
+                                const deleteBtn = document.createElement('button');
+                                deleteBtn.innerHTML = '×';
+                                deleteBtn.style.cssText = `
+                                    position: absolute;
+                                    top: 5px;
+                                    right: 5px;
+                                    background: rgba(255,0,0,0.9);
+                                    color: white;
+                                    border: none;
+                                    border-radius: 50%;
+                                    width: 25px;
+                                    height: 25px;
+                                    cursor: pointer;
+                                    font-size: 16px;
+                                    z-index: 10;
+                                `;
+                                deleteBtn.onclick = function() {
+                                    previewDiv.remove();
+                                };
+                                
+                                previewDiv.appendChild(img);
+                                previewDiv.appendChild(label);
+                                previewDiv.appendChild(deleteBtn);
+                                container.appendChild(previewDiv);
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                });
+            }
+            
+            console.log('✅ Image upload initialized');
+        });
+    </script>
+</body>
+</html>

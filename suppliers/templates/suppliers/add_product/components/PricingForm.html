@@ -1,0 +1,93 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Pricing Form Component -->
+<div class="form-section">
+    <h2 class="section-title">قیمت‌گذاری</h2>
+    <div class="section-content">
+        <div class="form-group">
+            <label for="price_toman">قیمت (تومان) <span class="required">*</span></label>
+            <input type="text" id="price_toman" name="price_toman" step="1" min="0" required value="{% if form.price_toman %}{{ form.price_toman.value|default:'' }}{% elif product %}{{ product.price_toman }}{% endif %}" oninput="formatNumberWithCommas(this)" onblur="formatNumberWithCommas(this)" onchange="calculateDiscountFromPrice()">
+        </div>
+
+        <div class="form-group">
+            <label for="price_usd">قیمت (دلار) - اختیاری</label>
+            <input type="text" id="price_usd" name="price_usd" step="0.01" min="0" value="{% if form.price_usd %}{{ form.price_usd.value|default:'' }}{% elif product %}{{ product.price_usd }}{% endif %}" oninput="formatNumberWithCommas(this)" onblur="formatNumberWithCommas(this)">
+        </div>
+
+        <div class="form-group">
+            <label for="reduced_price_toman">قیمت کاهش یافته (تومان) - اختیاری</label>
+            <input type="text" id="reduced_price_toman" name="reduced_price_toman" step="1" min="0" value="{% if form.reduced_price_toman %}{{ form.reduced_price_toman.value|default:'' }}{% elif product %}{{ product.reduced_price_toman }}{% endif %}" oninput="formatNumberWithCommas(this)" onblur="formatNumberWithCommas(this); calculateDiscountFromReducedPrice()" onchange="calculateDiscountFromReducedPrice()">
+            <small class="form-text text-muted">قیمت تخفیف خورده محصول را وارد کنید</small>
+        </div>
+
+        <div class="form-group">
+            <label for="discount_percentage">درصد تخفیف - اختیاری</label>
+            <input type="number" id="discount_percentage" name="discount_percentage" step="0.01" min="0" max="100" value="{% if form.discount_percentage %}{{ form.discount_percentage.value|default:'' }}{% elif product %}{{ product.discount_percentage }}{% endif %}" oninput="calculateReducedPriceFromPercentage()" onchange="calculateReducedPriceFromPercentage()">
+            <small class="form-text text-muted">درصد تخفیف را وارد کنید (مثال: 15 برای 15%)</small>
+        </div>
+    </div>
+</div>
+
+<script>
+// Helper function to remove commas and convert to number
+function parseNumber(value) {
+    if (!value) return null;
+    // Remove commas and spaces
+    const cleaned = value.toString().replace(/,/g, '').replace(/\s/g, '');
+    // Convert Persian/Arabic digits to English
+    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    let result = cleaned;
+    for (let i = 0; i < 10; i++) {
+        result = result.replace(new RegExp(persianDigits[i], 'g'), i);
+        result = result.replace(new RegExp(arabicDigits[i], 'g'), i);
+    }
+    const num = parseFloat(result);
+    return isNaN(num) ? null : num;
+}
+
+// Calculate discount percentage when reduced price is changed
+function calculateDiscountFromReducedPrice() {
+    const originalPrice = parseNumber(document.getElementById('price_toman').value);
+    const reducedPrice = parseNumber(document.getElementById('reduced_price_toman').value);
+    
+    if (originalPrice && reducedPrice && originalPrice > 0 && reducedPrice <= originalPrice) {
+        const discount = ((originalPrice - reducedPrice) / originalPrice) * 100;
+        document.getElementById('discount_percentage').value = discount.toFixed(2);
+    } else if (originalPrice && reducedPrice && reducedPrice > originalPrice) {
+        // If reduced price is greater than original, clear the discount
+        document.getElementById('discount_percentage').value = '';
+        alert('قیمت کاهش یافته نمی‌تواند بیشتر از قیمت اصلی باشد');
+    } else if (!reducedPrice) {
+        // Clear discount if reduced price is cleared
+        document.getElementById('discount_percentage').value = '';
+    }
+}
+
+// Calculate reduced price when discount percentage is changed
+function calculateReducedPriceFromPercentage() {
+    const originalPrice = parseNumber(document.getElementById('price_toman').value);
+    const discountPercent = parseNumber(document.getElementById('discount_percentage').value);
+    
+    if (originalPrice && discountPercent && discountPercent >= 0 && discountPercent <= 100) {
+        const reducedPrice = originalPrice * (1 - discountPercent / 100);
+        // Format and update the reduced price field
+        document.getElementById('reduced_price_toman').value = Math.round(reducedPrice).toLocaleString('fa-IR');
+    } else if (!discountPercent) {
+        // Clear reduced price if discount is cleared
+        document.getElementById('reduced_price_toman').value = '';
+    } else if (discountPercent > 100 || discountPercent < 0) {
+        alert('درصد تخفیف باید بین 0 تا 100 باشد');
+        document.getElementById('discount_percentage').value = '';
+    }
+}
+
+// Calculate discount when original price changes (if reduced price exists)
+function calculateDiscountFromPrice() {
+    const reducedPrice = parseNumber(document.getElementById('reduced_price_toman').value);
+    if (reducedPrice) {
+        calculateDiscountFromReducedPrice();
+    }
+}
+</script>

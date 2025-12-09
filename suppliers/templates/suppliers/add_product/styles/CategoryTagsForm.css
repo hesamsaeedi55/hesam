@@ -1,0 +1,80 @@
+/* Component-specific styles for CategoryTagsForm */
+
+.category-section {
+    grid-column: span 2;
+    margin-bottom: 0;
+    max-width: 400px;
+}
+
+.category-section select {
+    width: 100%;
+    max-width: 400px;
+}
+
+.tag-section {
+    grid-column: span 2;
+    margin-bottom: 0;
+    max-width: 400px;
+}
+
+.multi-select-tags {
+    width: 100%;
+    min-height: 100px !important;
+}
+
+/* Select2 custom styling */
+.select2-container--default .select2-selection--multiple {
+    background-color: rgba(0, 0, 0, 0.2) !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: var(--border-radius) !important;
+    min-height: 100px !important;
+    height: auto !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    min-height: 100px !important;
+    height: auto !important;
+    padding: 8px !important;
+    display: block !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 4px 10px !important;
+    margin: 5px !important;
+    font-size: 0.9rem !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: white !important;
+    margin-right: 5px !important;
+}
+
+.select2-dropdown {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.select2-search__field {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+    width: 100% !important;
+}
+
+.select2-results__option {
+    color: var(--text-color) !important;
+    padding: 8px 12px !important;
+}
+
+.select2-results__option--highlighted {
+    background-color: var(--primary-color) !important;
+}
+
+/* Fix for RTL layout */
+.select2-container--default[dir="rtl"] .select2-selection--multiple .select2-selection__choice {
+    float: right;
+}

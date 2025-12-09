@@ -1,0 +1,14 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Reusable Textarea Component -->
+<div class="form-group">
+    <label for="{{ field_id }}">{{ label }}{% if required %}<span class="required">*</span>{% endif %}</label>
+    <textarea id="{{ field_id }}" 
+              name="{{ field_name }}" 
+              {% if required %}required{% endif %}
+              {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+              {% if min_height %}style="min-height: {{ min_height }}px;"{% endif %}>{{ value }}</textarea>
+    {% if help_text %}<small class="form-text text-muted">{{ help_text }}</small>{% endif %}
+    {% if error_message %}<div class="error-message">{{ error_message }}</div>{% endif %}
+</div>
