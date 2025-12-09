@@ -1,7 +1,9 @@
 services:
   - type: web
     name: myshop
+    plan: free
     env: python
+    region: oregon
     buildCommand: |
       pip install -r requirements.txt &&
       python manage.py migrate --no-input &&
@@ -23,3 +25,4 @@ services:
 databases:
   - name: myshop-db
     plan: free
+    region: oregon
